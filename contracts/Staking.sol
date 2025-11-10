@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {UD60x18, ud} from "@prb/math/src/UD60x18.sol";
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {ILAF} from "./interfaces/ILAF.sol";
 import {IRegister} from "./interfaces/IRegister.sol";
-import {Owned} from "./abstract/Owned.sol";
-import {_USDT, _ROUTER} from "./lib/Const.sol";
+import {IManager} from "./interfaces/IManager.sol";
 
-contract Staking is Owned {
+contract Staking is Initializable, UUPSUpgradeable {
     event Staked(
         address indexed user,
         uint256 amount,
@@ -25,15 +26,17 @@ contract Staking is Owned {
         uint40 timestamp,
         uint256 index
     );
+
     event Transfer(address indexed from, address indexed to, uint256 amount);
+
     IRegister public immutable REGISTER;
-    uint8 immutable maxD = 30;
+    IManager public manager;
+    IUniswapV2Router02 public immutable ROUTER;
+    IERC20 public immutable USDT;
+    uint8 public constant maxD = 30;
 
     uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
     uint256[3] public stakeDays = [1 days, 15 days, 30 days];
-
-    IUniswapV2Router02 constant private ROUTER = IUniswapV2Router02(_ROUTER);
-    IERC20 constant private USDT = IERC20(_USDT);
 
     ILAF public LAF;
 
@@ -70,8 +73,16 @@ contract Staking is Owned {
         _;
     }
 
-    constructor(address REGISTER_, address marketingAddress_) Owned(msg.sender) {
+    constructor(address REGISTER_, address ROUTER_, address USDT_) {
         REGISTER = IRegister(REGISTER_);
+        ROUTER = IUniswapV2Router02(ROUTER_);
+        USDT = IERC20(USDT_);
+    }
+
+    function initialize(IManager manager_, address marketingAddress_) initializer public {
+        __UUPSUpgradeable_init();
+        manager = manager_;
+
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
@@ -382,8 +393,14 @@ contract Staking is Owned {
         IUniswapV2Pair(pair).sync();
     }
 
-    function emergencyWithdrawLAF(address to, uint256 _amount) external onlyOwner {
+    function emergencyWithdrawLAF(address to, uint256 _amount) external {
+        manager.allowFoundation(msg.sender);
         LAF.transfer(to, _amount);
+    }
+
+    // 如果newImplementation没有upgradeTo方法，则无法继续升级
+    function _authorizeUpgrade(address newImplementation) internal view override {
+        manager.allowUpgrade(newImplementation, msg.sender);
     }
 
     // struct Users {
