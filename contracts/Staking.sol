@@ -37,7 +37,6 @@ contract Staking is Owned {
 
     ILAF public LAF;
 
-
     address private marketingAddress;
 
     uint8 public constant decimals = 18;
