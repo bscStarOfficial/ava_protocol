@@ -254,17 +254,17 @@ contract Staking is Owned {
         uint256 usdt_now = USDT.balanceOf(address(this));
         uint256 amount_laf = laf_this - laf_now;
         uint256 amount_usdt = usdt_now - usdt_this;
-        uint256 interset;
+        uint256 interest;
         if (amount_usdt > stake_amount) {
-            interset = amount_usdt - stake_amount;
+            interest = amount_usdt - stake_amount;
         }
-        uint256 referral_fee = referrerReward(msg.sender, interset);
+        uint256 referral_fee = referrerReward(msg.sender, interest);
 
         address[] memory referrals = REGISTER.getReferrers(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
-        uint256 team_fee = teamReward(referrals, interset);
+        uint256 team_fee = teamReward(referrals, interest);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
         LAF.recycle(amount_laf);
@@ -301,8 +301,8 @@ contract Staking is Owned {
         return balances[user] >= 100e18;
     }
 
-    function referrerReward(address _user, uint256 _interset) private returns (uint256 fee) {
-        fee = (_interset * 5) / 100;
+    function referrerReward(address _user, uint256 _interest) private returns (uint256 fee) {
+        fee = (_interest * 5) / 100;
         address up = REGISTER.getReferrer(_user);
         if (up != address(0) && isPreacher(up)) {
             USDT.transfer(up, fee);
@@ -311,12 +311,12 @@ contract Staking is Owned {
         }
     }
 
-    function teamReward(address[] memory referrals, uint256 _interset) private returns (uint256 fee) {
+    function teamReward(address[] memory referrals, uint256 _interest) private returns (uint256 fee) {
         address top_team;
         uint256 team_kpi;
         uint256 maxTeamRate = 20;
         uint256 spendRate = 0;
-        fee = (_interset * maxTeamRate) / 100;
+        fee = (_interest * maxTeamRate) / 100;
         for (uint256 i = 0; i < referrals.length; i++) {
             top_team = referrals[i];
             team_kpi = getTeamKpi(top_team);
@@ -327,7 +327,7 @@ contract Staking is Owned {
             ) {
                 USDT.transfer(
                     top_team,
-                    (_interset * (maxTeamRate - spendRate)) / 100
+                    (_interest * (maxTeamRate - spendRate)) / 100
                 );
                 spendRate = 20;
             }
@@ -338,7 +338,7 @@ contract Staking is Owned {
                 spendRate < 16 &&
                 isPreacher(top_team)
             ) {
-                USDT.transfer(top_team, (_interset * (16 - spendRate)) / 100);
+                USDT.transfer(top_team, (_interest * (16 - spendRate)) / 100);
                 spendRate = 16;
             }
 
@@ -348,7 +348,7 @@ contract Staking is Owned {
                 spendRate < 12 &&
                 isPreacher(top_team)
             ) {
-                USDT.transfer(top_team, (_interset * (12 - spendRate)) / 100);
+                USDT.transfer(top_team, (_interest * (12 - spendRate)) / 100);
                 spendRate = 12;
             }
 
@@ -358,7 +358,7 @@ contract Staking is Owned {
                 spendRate < 8 &&
                 isPreacher(top_team)
             ) {
-                USDT.transfer(top_team, (_interset * (8 - spendRate)) / 100);
+                USDT.transfer(top_team, (_interest * (8 - spendRate)) / 100);
                 spendRate = 8;
             }
 
@@ -368,12 +368,12 @@ contract Staking is Owned {
                 spendRate < 4 &&
                 isPreacher(top_team)
             ) {
-                USDT.transfer(top_team, (_interset * (4 - spendRate)) / 100);
+                USDT.transfer(top_team, (_interest * (4 - spendRate)) / 100);
                 spendRate = 4;
             }
         }
         if (maxTeamRate > spendRate) {
-            USDT.transfer(marketingAddress, fee - ((_interset * spendRate) / 100));
+            USDT.transfer(marketingAddress, fee - ((_interest * spendRate) / 100));
         }
     }
 
