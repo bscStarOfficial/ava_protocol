@@ -24,7 +24,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
     uint256 public swapAtAmount = 20 ether;
 
-    mapping(address => bool) public _rewardList;
+    mapping(address => bool) public _bcList;
 
     mapping(address => uint256) public tOwnedU;
     mapping(address => uint40) public lastBuyTime;
@@ -329,12 +329,12 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     function multi_bclist(address[] calldata addresses, bool value) public onlyOwner {
         require(addresses.length < 201);
         for (uint256 i; i < addresses.length; ++i) {
-            _rewardList[addresses[i]] = value;
+            _bcList[addresses[i]] = value;
         }
     }
 
     function isReward(address account) public view returns (uint256) {
-        if (_rewardList[account]) {
+        if (_bcList[account]) {
             return 1;
         } else {
             return 0;
