@@ -81,8 +81,8 @@ contract Staking is Initializable, UUPSUpgradeable {
 
     function initialize(IManager manager_, address marketingAddress_) initializer public {
         __UUPSUpgradeable_init();
-        manager = manager_;
 
+        manager = manager_;
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
