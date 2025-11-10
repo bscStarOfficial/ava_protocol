@@ -15,7 +15,7 @@ abstract contract Owned {
     //////////////////////////////////////////////////////////////*/
 
     address public owner;
-    // 如果用户误转入token到此合约，此账户可以提取出
+    // If a user mistakenly transfers tokens to this contract, this account can withdraw them.
     address public abandonedBalanceOwner;
 
     modifier onlyOwner() virtual {
