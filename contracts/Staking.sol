@@ -19,7 +19,7 @@ contract Staking is Owned {
         uint256 stakeTime
     );
 
-    event RewardPaid(
+    event UnStaked(
         address indexed user,
         uint256 reward,
         uint40 timestamp,
@@ -290,7 +290,7 @@ contract Staking is Owned {
 
         userIndex[sender] = userIndex[sender] + 1;
 
-        emit RewardPaid(sender, reward, uint40(block.timestamp), index);
+        emit UnStaked(sender, reward, uint40(block.timestamp), index);
     }
 
     function getTeamKpi(address _user) public view returns (uint256) {
