@@ -189,9 +189,9 @@ contract Staking is Owned {
         uint256 stake_index = cord.length;
         cord.push(order);
 
-        address[] memory referrals = REGISTER.getReferrers(sender, maxD);
-        for (uint8 i = 0; i < referrals.length; i++) {
-            teamTotalInvestValue[referrals[i]] += _amount;
+        address[] memory referrers = REGISTER.getReferrers(sender, maxD);
+        for (uint8 i = 0; i < referrers.length; i++) {
+            teamTotalInvestValue[referrers[i]] += _amount;
         }
 
         emit Transfer(address(0), sender, _amount);
@@ -260,11 +260,11 @@ contract Staking is Owned {
         }
         uint256 referral_fee = referrerReward(msg.sender, interest);
 
-        address[] memory referrals = REGISTER.getReferrers(msg.sender, maxD);
-        for (uint8 i = 0; i < referrals.length; i++) {
-            teamTotalInvestValue[referrals[i]] -= stake_amount;
+        address[] memory referrers = REGISTER.getReferrers(msg.sender, maxD);
+        for (uint8 i = 0; i < referrers.length; i++) {
+            teamTotalInvestValue[referrers[i]] -= stake_amount;
         }
-        uint256 team_fee = teamReward(referrals, interest);
+        uint256 team_fee = teamReward(referrers, interest);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
         LAF.recycle(amount_laf);
@@ -311,14 +311,14 @@ contract Staking is Owned {
         }
     }
 
-    function teamReward(address[] memory referrals, uint256 _interest) private returns (uint256 fee) {
+    function teamReward(address[] memory referrers, uint256 _interest) private returns (uint256 fee) {
         address top_team;
         uint256 team_kpi;
         uint256 maxTeamRate = 20;
         uint256 spendRate = 0;
         fee = (_interest * maxTeamRate) / 100;
-        for (uint256 i = 0; i < referrals.length; i++) {
-            top_team = referrals[i];
+        for (uint256 i = 0; i < referrers.length; i++) {
+            top_team = referrers[i];
             team_kpi = getTeamKpi(top_team);
             if (
                 team_kpi >= 1000000 * 10 ** 18 &&
