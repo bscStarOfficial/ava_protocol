@@ -2,15 +2,15 @@
 pragma solidity ^0.8.20;
 
 import {FirstLaunch} from "./abstract/FirstLaunch.sol";
-import {Owned} from "solmate/src/auth/Owned.sol";
+import {Owned} from "./abstract/Owned.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {ERC20} from "./abstract/token/ERC20.sol";
 import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
 import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
-import {IReferral} from "./interface/IReferral.sol";
-import {IStaking} from "./interface/IStaking.sol";
+import {IReferral} from "./interfaces/IReferral.sol";
+import {IStaking} from "./interfaces/IStaking.sol";
 
 contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     bool public presale;

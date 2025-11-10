@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.17;
 
-import {Owned} from "solmate/src/auth/Owned.sol";
+import {Owned} from "./Owned.sol";
 
 abstract contract ExcludedFromFeeList is Owned {
     mapping(address => bool) internal _isExcludedFromFee;
