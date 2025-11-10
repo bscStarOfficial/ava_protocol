@@ -35,8 +35,8 @@ contract Staking is Initializable, UUPSUpgradeable {
     IERC20 public immutable USDT;
     uint8 public constant maxD = 30;
 
-    uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
-    uint256[3] public stakeDays = [1 days, 15 days, 30 days];
+    uint256[3] public rates;
+    uint256[3] public stakeDays;
 
     ILAF public LAF;
 
@@ -85,6 +85,9 @@ contract Staking is Initializable, UUPSUpgradeable {
         manager = manager_;
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
+
+        rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
+        stakeDays = [1 days, 15 days, 30 days];
     }
 
     function setLAF(address _laf) external {
