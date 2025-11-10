@@ -22,6 +22,10 @@ contract RegisterHelper {
         return referrals[user];
     }
 
+    function getReferrer(address user) public view returns (address) {
+        return referrers[user];
+    }
+
     function getReferrers(address user, uint count) public view returns (address[] memory _referrers) {
         uint realCount;
         address[] memory rf = new address[](count);
