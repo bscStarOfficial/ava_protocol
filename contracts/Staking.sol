@@ -27,17 +27,17 @@ contract Staking is Owned {
     );
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    uint256[3] rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
-    uint256[3] stakeDays = [1 days, 15 days, 30 days];
+    uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
+    uint256[3] public stakeDays = [1 days, 15 days, 30 days];
 
-    IUniswapV2Router02 constant ROUTER = IUniswapV2Router02(_ROUTER);
-    IERC20 constant USDT = IERC20(_USDT);
+    IUniswapV2Router02 constant private ROUTER = IUniswapV2Router02(_ROUTER);
+    IERC20 constant private USDT = IERC20(_USDT);
 
     ILAF public LAF;
 
     IRegister public REGISTER;
 
-    address marketingAddress;
+    address private marketingAddress;
 
     uint8 public constant decimals = 18;
     string public constant name = "Computility";
