@@ -258,7 +258,7 @@ contract Staking is Owned {
         if (amount_usdt > stake_amount) {
             interset = amount_usdt - stake_amount;
         }
-        uint256 referral_fee = referralReward(msg.sender, interset);
+        uint256 referral_fee = referrerReward(msg.sender, interset);
 
         address[] memory referrals = REGISTER.getReferrers(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
@@ -301,7 +301,7 @@ contract Staking is Owned {
         return balances[user] >= 100e18;
     }
 
-    function referralReward(address _user, uint256 _interset) private returns (uint256 fee) {
+    function referrerReward(address _user, uint256 _interset) private returns (uint256 fee) {
         fee = (_interset * 5) / 100;
         address up = REGISTER.getReferrer(_user);
         if (up != address(0) && isPreacher(up)) {
