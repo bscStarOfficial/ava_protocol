@@ -48,6 +48,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         coldTime = _coldTime;
     }
 
+    // Not removable; early calls to the staking contract.
     function updatePoolReserve() public {
         require(block.timestamp >= poolStatus.t + 1 hours, "1hor");
         poolStatus.t = uint40(block.timestamp);
