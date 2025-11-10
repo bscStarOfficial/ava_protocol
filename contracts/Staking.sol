@@ -384,10 +384,7 @@ contract Staking is Owned {
         IUniswapV2Pair(pair).sync();
     }
 
-    function emergencyWithdrawLAF(address to, uint256 _amount)
-    external
-    onlyOwner
-    {
+    function emergencyWithdrawLAF(address to, uint256 _amount) external onlyOwner {
         LAF.transfer(to, _amount);
     }
 
