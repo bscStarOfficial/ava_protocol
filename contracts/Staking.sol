@@ -32,22 +32,20 @@ contract Staking is Initializable, UUPSUpgradeable {
     IRegister public immutable REGISTER;
     IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
+
     uint8 public constant maxD = 30;     // 30代
+    uint8 public constant decimals = 18;
+    string public constant name = "Computility";
+    string public constant symbol = "Computility";
+    uint256 public totalSupply;
 
     IManager public manager;
+    ILAF public LAF;
 
     uint256[3] public rates;
     uint256[3] public stakeDays;
 
-    ILAF public LAF;
-
     address private marketingAddress;
-
-    uint8 public constant decimals = 18;
-    string public constant name = "Computility";
-    string public constant symbol = "Computility";
-
-    uint256 public totalSupply;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public userIndex;
 
