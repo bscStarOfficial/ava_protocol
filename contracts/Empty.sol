@@ -3,31 +3,14 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./lib/RegisterHelper.sol";
 import "./interfaces/IManager.sol";
 
-contract Register is Initializable, UUPSUpgradeable, RegisterHelper {
+contract Empty is Initializable, UUPSUpgradeable {
     IManager public manager;
-
-    event Registered(address referral, address referrer);
 
     function initialize(IManager _manager) initializer public {
         __UUPSUpgradeable_init();
         manager = _manager;
-    }
-
-    function register(address referral, address referrer) external {
-        bytes32 role = keccak256("REGISTER");
-        require(manager.hasRole(role, msg.sender), '!REGISTER');
-
-        registerInternal(referral, referrer);
-        emit Registered(referral, referrer);
-    }
-
-    function setReferrer(address referral, address referrer) external {
-        manager.allowFoundation(msg.sender);
-
-        referrers[referral] = referrer;
     }
 
     // 如果newImplementation没有upgradeTo方法，则无法继续升级
