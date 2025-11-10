@@ -26,13 +26,19 @@ contract RegisterHelper {
         return referrals[user];
     }
 
-    function getReferrers(address user, uint count) public view returns (address[] memory _referrers, uint realCount) {
-        _referrers = new address[](count);
+    function getReferrers(address user, uint count) public view returns (address[] memory _referrers) {
+        uint realCount;
+        address[] memory rf = new address[](count);
         for (uint i = 0; i < count; i++) {
-            _referrers[i] = referrers[user];
-            user = _referrers[i];
+            rf[i] = referrers[user];
+            user = rf[i];
             if(user == ROOT_USER || user == address(0)) break;
             realCount++;
+        }
+
+        _referrers = new address[](realCount);
+        for (uint i = 0; i < realCount; i++) {
+            _referrers[i] = rf[i];
         }
     }
 
