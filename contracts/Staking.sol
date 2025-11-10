@@ -30,10 +30,11 @@ contract Staking is Initializable, UUPSUpgradeable {
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
     IRegister public immutable REGISTER;
-    IManager public manager;
     IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
     uint8 public constant maxD = 30;
+
+    IManager public manager;
 
     uint256[3] public rates;
     uint256[3] public stakeDays;
