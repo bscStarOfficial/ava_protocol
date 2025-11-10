@@ -7,7 +7,7 @@ interface IRegister {
 
     function getReferral(address _address) external view returns (address);
 
-    function isBindReferral(address _address) external view returns (bool);
+    function registered(address _address) external view returns (bool);
 
     function getReferralCount(address _address) external view returns (uint256);
 

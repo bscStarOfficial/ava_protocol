@@ -136,7 +136,7 @@ contract Staking is Owned {
         require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
         address user = msg.sender;
-        if (!REGISTER.isBindReferral(user) && REGISTER.isBindReferral(parent)) {
+        if (!REGISTER.registered(user)) {
             REGISTER.bindReferral(parent, user);
         }
         mint(user, _amount, _stakeIndex);
@@ -171,7 +171,7 @@ contract Staking is Owned {
     }
 
     function mint(address sender, uint160 _amount, uint8 _stakeIndex) private {
-        require(REGISTER.isBindReferral(sender), "!!bind");
+        require(REGISTER.registered(sender), "!!bind");
         RecordTT memory tsy;
         tsy.stakeTime = uint40(block.timestamp);
         tsy.tamount = uint160(totalSupply);
