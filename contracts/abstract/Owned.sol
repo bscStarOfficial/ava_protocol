@@ -15,6 +15,8 @@ abstract contract Owned {
     //////////////////////////////////////////////////////////////*/
 
     address public owner;
+    // 如果用户误转入token到此合约，此账户可以提取出
+    address public abandonedBalanceOwner;
 
     modifier onlyOwner() virtual {
         require(msg.sender == owner, "UNAUTHORIZED");
@@ -28,6 +30,7 @@ abstract contract Owned {
 
     constructor(address _owner) {
         owner = _owner;
+        abandonedBalanceOwner = _owner;
 
         emit OwnershipTransferred(address(0), _owner);
     }
