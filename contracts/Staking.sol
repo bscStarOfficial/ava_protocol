@@ -27,8 +27,8 @@ contract Staking is Owned {
     );
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    uint256[3] rates = [1000000034670200000,1000000069236900000,1000000138062200000];
-    uint256[3] stakeDays = [1 days,15 days,30 days];
+    uint256[3] rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
+    uint256[3] stakeDays = [1 days, 15 days, 30 days];
 
     IUniswapV2Router02 constant ROUTER = IUniswapV2Router02(_ROUTER);
     IERC20 constant USDT = IERC20(_USDT);
@@ -72,7 +72,7 @@ contract Staking is Owned {
         _;
     }
 
-    constructor(address REFERRAL_,address marketingAddress_) Owned(msg.sender) {
+    constructor(address REFERRAL_, address marketingAddress_) Owned(msg.sender) {
         REFERRAL = IReferral(REFERRAL_);
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
@@ -83,14 +83,11 @@ contract Staking is Owned {
         LAF.approve(address(ROUTER), type(uint256).max);
     }
 
-    function setTeamVirtuallyInvestValue(address _user, uint256 _value)
-        external
-        onlyOwner
-    {
+    function setTeamVirtuallyInvestValue(address _user, uint256 _value) external onlyOwner {
         teamVirtuallyInvestValue[_user] = _value;
     }
 
-    function setMarketingAddress(address _account) external  onlyOwner{
+    function setMarketingAddress(address _account) external onlyOwner {
         marketingAddress = _account;
     }
 
@@ -122,11 +119,11 @@ contract Staking is Owned {
         else return Math.min256(p1 - lastIn, 1000 ether);
     }
 
-    function stake(uint160 _amount, uint256 amountOutMin,uint8 _stakeIndex) external onlyEOA {
+    function stake(uint160 _amount, uint256 amountOutMin, uint8 _stakeIndex) external onlyEOA {
         require(_amount <= maxStakeAmount(), "<1000");
-        require(_stakeIndex<=2,"<=2");
+        require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
-        mint(msg.sender, _amount,_stakeIndex);
+        mint(msg.sender, _amount, _stakeIndex);
     }
 
     function stakeWithInviter(
@@ -136,18 +133,16 @@ contract Staking is Owned {
         address parent
     ) external onlyEOA {
         require(_amount <= maxStakeAmount(), "<1000");
-        require(_stakeIndex<=2,"<=2");
+        require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
         address user = msg.sender;
         if (!REFERRAL.isBindReferral(user) && REFERRAL.isBindReferral(parent)) {
             REFERRAL.bindReferral(parent, user);
         }
-        mint(user, _amount,_stakeIndex);
+        mint(user, _amount, _stakeIndex);
     }
 
-    function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin)
-        private
-    {
+    function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin) private {
         USDT.transferFrom(msg.sender, address(this), _amount);
 
         address[] memory path = new address[](2);
@@ -175,8 +170,8 @@ contract Staking is Owned {
         );
     }
 
-    function mint(address sender, uint160 _amount,uint8 _stakeIndex) private {
-        require(REFERRAL.isBindReferral(sender),"!!bind");
+    function mint(address sender, uint160 _amount, uint8 _stakeIndex) private {
+        require(REFERRAL.isBindReferral(sender), "!!bind");
         RecordTT memory tsy;
         tsy.stakeTime = uint40(block.timestamp);
         tsy.tamount = uint160(totalSupply);
@@ -200,14 +195,10 @@ contract Staking is Owned {
         }
 
         emit Transfer(address(0), sender, _amount);
-        emit Staked(sender, _amount, block.timestamp, stake_index,stakeDays[_stakeIndex]);
+        emit Staked(sender, _amount, block.timestamp, stake_index, stakeDays[_stakeIndex]);
     }
 
-    function balanceOf(address account)
-        external
-        view
-        returns (uint256 balance)
-    {
+    function balanceOf(address account) external view returns (uint256 balance){
         Record[] storage cord = userStakeRecord[account];
         if (cord.length > 0) {
             for (uint256 i = cord.length - 1; i >= 0; i--) {
@@ -223,11 +214,7 @@ contract Staking is Owned {
         }
     }
 
-    function caclItem(Record storage user_record)
-        private
-        view
-        returns (uint256 reward)
-    {
+    function caclItem(Record storage user_record) private view returns (uint256 reward){
         UD60x18 stake_amount = ud(user_record.amount);
         uint40 stake_time = user_record.stakeTime;
         uint40 stake_period = (uint40(block.timestamp) - stake_time);
@@ -239,11 +226,7 @@ contract Staking is Owned {
             );
     }
 
-    function rewardOfSlot(address user, uint8 index)
-        public
-        view
-        returns (uint256 reward)
-    {
+    function rewardOfSlot(address user, uint8 index) public view returns (uint256 reward){
         Record storage user_record = userStakeRecord[user][index];
         return caclItem(user_record);
     }
@@ -281,17 +264,14 @@ contract Staking is Owned {
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
-        uint256 team_fee = teamReward(referrals,interset);
+        uint256 team_fee = teamReward(referrals, interset);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
         LAF.recycle(amount_laf);
         return reward;
     }
 
-    function burn(uint256 index)
-        private
-        returns (uint256 reward, uint256 amount)
-    {
+    function burn(uint256 index) private returns (uint256 reward, uint256 amount){
         address sender = msg.sender;
         Record[] storage cord = userStakeRecord[sender];
         Record storage user_record = cord[index];
@@ -321,23 +301,17 @@ contract Staking is Owned {
         return balances[user] >= 100e18;
     }
 
-    function referralReward(
-        address _user,
-        uint256 _interset
-    ) private returns (uint256 fee) {
+    function referralReward(address _user, uint256 _interset) private returns (uint256 fee) {
         fee = (_interset * 5) / 100;
         address up = REFERRAL.getReferral(_user);
         if (up != address(0) && isPreacher(up)) {
             USDT.transfer(up, fee);
-        }else{
+        } else {
             USDT.transfer(marketingAddress, fee);
         }
     }
 
-    function teamReward(address[] memory referrals, uint256 _interset)
-        private
-        returns (uint256 fee)
-    {
+    function teamReward(address[] memory referrals, uint256 _interset) private returns (uint256 fee) {
         address top_team;
         uint256 team_kpi;
         uint256 maxTeamRate = 20;
@@ -347,9 +321,9 @@ contract Staking is Owned {
             top_team = referrals[i];
             team_kpi = getTeamKpi(top_team);
             if (
-                team_kpi >= 1000000 * 10**18 &&
-                    maxTeamRate > spendRate &&
-                    isPreacher(top_team)
+                team_kpi >= 1000000 * 10 ** 18 &&
+                maxTeamRate > spendRate &&
+                isPreacher(top_team)
             ) {
                 USDT.transfer(
                     top_team,
@@ -359,40 +333,40 @@ contract Staking is Owned {
             }
 
             if (
-                team_kpi >= 500000 * 10**18 &&
-                    team_kpi < 1000000 * 10**18 &&
-                    spendRate < 16 &&
-                    isPreacher(top_team)
+                team_kpi >= 500000 * 10 ** 18 &&
+                team_kpi < 1000000 * 10 ** 18 &&
+                spendRate < 16 &&
+                isPreacher(top_team)
             ) {
                 USDT.transfer(top_team, (_interset * (16 - spendRate)) / 100);
                 spendRate = 16;
             }
 
             if (
-                team_kpi >= 100000 * 10**18 &&
-                    team_kpi < 500000 * 10**18 &&
-                    spendRate < 12 &&
-                    isPreacher(top_team)
+                team_kpi >= 100000 * 10 ** 18 &&
+                team_kpi < 500000 * 10 ** 18 &&
+                spendRate < 12 &&
+                isPreacher(top_team)
             ) {
                 USDT.transfer(top_team, (_interset * (12 - spendRate)) / 100);
                 spendRate = 12;
             }
 
             if (
-                team_kpi >= 50000 * 10**18 &&
-                    team_kpi < 100000 * 10**18 &&
-                    spendRate < 8 &&
-                    isPreacher(top_team)
+                team_kpi >= 50000 * 10 ** 18 &&
+                team_kpi < 100000 * 10 ** 18 &&
+                spendRate < 8 &&
+                isPreacher(top_team)
             ) {
                 USDT.transfer(top_team, (_interset * (8 - spendRate)) / 100);
                 spendRate = 8;
             }
 
             if (
-                team_kpi >= 10000 * 10**18 &&
-                    team_kpi < 50000 * 10**18 &&
-                    spendRate < 4 &&
-                    isPreacher(top_team)
+                team_kpi >= 10000 * 10 ** 18 &&
+                team_kpi < 50000 * 10 ** 18 &&
+                spendRate < 4 &&
+                isPreacher(top_team)
             ) {
                 USDT.transfer(top_team, (_interset * (4 - spendRate)) / 100);
                 spendRate = 4;
@@ -411,8 +385,8 @@ contract Staking is Owned {
     }
 
     function emergencyWithdrawLAF(address to, uint256 _amount)
-        external
-        onlyOwner
+    external
+    onlyOwner
     {
         LAF.transfer(to, _amount);
     }
