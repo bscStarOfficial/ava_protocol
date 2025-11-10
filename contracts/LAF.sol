@@ -51,7 +51,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     function updatePoolReserve() public {
         require(block.timestamp >= poolStatus.t + 1 hours, "1hor");
         poolStatus.t = uint40(block.timestamp);
-        (uint112 reserveU, , ) = IUniswapV2Pair(uniswapV2Pair).getReserves();
+        (uint112 reserveU, ,) = IUniswapV2Pair(uniswapV2Pair).getReserves();
         poolStatus.bal = reserveU;
     }
 
@@ -109,7 +109,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
             // buy
             unchecked {
-                (uint112 reserveU, uint112 reserveThis, ) = IUniswapV2Pair(
+                (uint112 reserveU, uint112 reserveThis,) = IUniswapV2Pair(
                     uniswapV2Pair
                 ).getReserves();
                 require(amount <= reserveThis / 10, "max cap buy"); //每次买单最多只能卖池子的10%
@@ -124,11 +124,11 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
                 uint256 fee;
                 uint256 burnAmount = balanceOf[address(0xdead)];
-                if (burnAmount < 1000000 * 10**18) {
+                if (burnAmount < 1000000 * 10 ** 18) {
                     fee = (amount * 5) / 1000;
-                    fee = 1000000 * 10**18 - burnAmount > fee
+                    fee = 1000000 * 10 ** 18 - burnAmount > fee
                         ? fee
-                        : 1000000 * 10**18 - burnAmount;
+                        : 1000000 * 10 ** 18 - burnAmount;
                     super._transfer(sender, address(0xdead), fee);
                 }
                 uint256 LPFee = (amount * 25) / 1000;
@@ -140,7 +140,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             require(presale, "pre");
             require(block.timestamp >= lastBuyTime[sender] + coldTime, "cold");
             //sell
-            (uint112 reserveU, uint112 reserveThis, ) = IUniswapV2Pair(
+            (uint112 reserveU, uint112 reserveThis,) = IUniswapV2Pair(
                 uniswapV2Pair
             ).getReserves();
             require(amount <= reserveThis / 10, "max cap sell"); //每次卖单最多只能卖池子的20%
@@ -188,21 +188,17 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
-    function marketingFeeRate() internal view returns(uint256 result){
-            result = 30;
-            if (
-                launchedAtTimestamp > 0 &&
-                block.timestamp - launchedAtTimestamp <= 15 minutes
-            ) {
-                result = 80;
-            }
+    function marketingFeeRate() internal view returns (uint256 result) {
+        result = 30;
+        if (
+            launchedAtTimestamp > 0 &&
+            block.timestamp - launchedAtTimestamp <= 15 minutes
+        ) {
+            result = 80;
+        }
     }
 
-    function shouldSwapTokenForFund(uint256 amount)
-        internal
-        view
-        returns (bool)
-    {
+    function shouldSwapTokenForFund(uint256 amount) internal view returns (bool) {
         if (amount >= swapAtAmount && !inSwapAndLiquify) {
             return true;
         } else {
@@ -230,13 +226,10 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
-    function swapProfit(uint256 tokenAmount, address _user)
-        internal
-        lockTheSwap
-    {
+    function swapProfit(uint256 tokenAmount, address _user) internal lockTheSwap {
         uint256 bal = balanceOf[address(this)] -
-            AmountLPFee -
-            AmountMarketingFee;
+                    AmountLPFee -
+                    AmountMarketingFee;
         uint256 t2 = tokenAmount * 2;
         uint256 amountIn = t2 >= bal ? bal : t2;
         unchecked {
@@ -294,15 +287,15 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             address[] memory path = new address[](2);
             path[0] = address(this);
             path[1] = address(USDT);
-            // make the swap
+        // make the swap
             uniswapV2Router
-                .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    tokenAmount,
-                    0, // accept any amount of ETH
-                    path,
-                    to,
-                    block.timestamp
-                );
+            .swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                tokenAmount,
+                0, // accept any amount of ETH
+                path,
+                to,
+                block.timestamp
+            );
         }
     }
 
@@ -333,10 +326,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         excludeFromFee(addr);
     }
 
-    function multi_bclist(address[] calldata addresses, bool value)
-        public
-        onlyOwner
-    {
+    function multi_bclist(address[] calldata addresses, bool value) public onlyOwner {
         require(addresses.length < 201);
         for (uint256 i; i < addresses.length; ++i) {
             _rewardList[addresses[i]] = value;
