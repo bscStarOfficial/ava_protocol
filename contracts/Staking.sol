@@ -189,7 +189,7 @@ contract Staking is Owned {
         uint256 stake_index = cord.length;
         cord.push(order);
 
-        address[] memory referrals = REGISTER.getReferrals(sender, maxD);
+        address[] memory referrals = REGISTER.getReferrers(sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] += _amount;
         }
@@ -260,7 +260,7 @@ contract Staking is Owned {
         }
         uint256 referral_fee = referralReward(msg.sender, interset);
 
-        address[] memory referrals = REGISTER.getReferrals(msg.sender, maxD);
+        address[] memory referrals = REGISTER.getReferrers(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
@@ -303,7 +303,7 @@ contract Staking is Owned {
 
     function referralReward(address _user, uint256 _interset) private returns (uint256 fee) {
         fee = (_interset * 5) / 100;
-        address up = REGISTER.getReferral(_user);
+        address up = REGISTER.getReferrer(_user);
         if (up != address(0) && isPreacher(up)) {
             USDT.transfer(up, fee);
         } else {
