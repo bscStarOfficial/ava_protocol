@@ -6,7 +6,7 @@ import {UD60x18, ud} from "@prb/math/src/UD60x18.sol";
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {ILAF} from "./interfaces/ILAF.sol";
-import {IReferral} from "./interfaces/IReferral.sol";
+import {IRegister} from "./interfaces/IRegister.sol";
 import {Owned} from "./abstract/Owned.sol";
 import {_USDT, _ROUTER} from "./lib/Const.sol";
 
@@ -35,7 +35,7 @@ contract Staking is Owned {
 
     ILAF public LAF;
 
-    IReferral public REFERRAL;
+    IRegister public REGISTER;
 
     address marketingAddress;
 
@@ -72,8 +72,8 @@ contract Staking is Owned {
         _;
     }
 
-    constructor(address REFERRAL_, address marketingAddress_) Owned(msg.sender) {
-        REFERRAL = IReferral(REFERRAL_);
+    constructor(address REGISTER_, address marketingAddress_) Owned(msg.sender) {
+        REGISTER = IRegister(REGISTER_);
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
@@ -136,8 +136,8 @@ contract Staking is Owned {
         require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
         address user = msg.sender;
-        if (!REFERRAL.isBindReferral(user) && REFERRAL.isBindReferral(parent)) {
-            REFERRAL.bindReferral(parent, user);
+        if (!REGISTER.isBindReferral(user) && REGISTER.isBindReferral(parent)) {
+            REGISTER.bindReferral(parent, user);
         }
         mint(user, _amount, _stakeIndex);
     }
@@ -171,7 +171,7 @@ contract Staking is Owned {
     }
 
     function mint(address sender, uint160 _amount, uint8 _stakeIndex) private {
-        require(REFERRAL.isBindReferral(sender), "!!bind");
+        require(REGISTER.isBindReferral(sender), "!!bind");
         RecordTT memory tsy;
         tsy.stakeTime = uint40(block.timestamp);
         tsy.tamount = uint160(totalSupply);
@@ -189,7 +189,7 @@ contract Staking is Owned {
         uint256 stake_index = cord.length;
         cord.push(order);
 
-        address[] memory referrals = REFERRAL.getReferrals(sender, maxD);
+        address[] memory referrals = REGISTER.getReferrals(sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] += _amount;
         }
@@ -260,7 +260,7 @@ contract Staking is Owned {
         }
         uint256 referral_fee = referralReward(msg.sender, interset);
 
-        address[] memory referrals = REFERRAL.getReferrals(msg.sender, maxD);
+        address[] memory referrals = REGISTER.getReferrals(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
@@ -303,7 +303,7 @@ contract Staking is Owned {
 
     function referralReward(address _user, uint256 _interset) private returns (uint256 fee) {
         fee = (_interset * 5) / 100;
-        address up = REFERRAL.getReferral(_user);
+        address up = REGISTER.getReferral(_user);
         if (up != address(0) && isPreacher(up)) {
             USDT.transfer(up, fee);
         } else {

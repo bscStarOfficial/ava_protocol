@@ -9,7 +9,7 @@ import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
 import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
-import {IReferral} from "./interfaces/IReferral.sol";
+import {IRegister} from "./interfaces/IReferral.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 
 contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
@@ -236,7 +236,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         unchecked {
             swapTokenForUsdt(amountIn, address(distributor));
             uint256 amount = IERC20(USDT).balanceOf(address(distributor));
-            address up = IReferral(REFERRAL).getReferral(_user);
+            address up = IRegister(REFERRAL).getReferral(_user);
             if (up != address(0) && IStaking(STAKING).isPreacher(up)) {
                 uint256 efee = (amount * tokenAmount) / amountIn / 5;
                 IERC20(USDT).transferFrom(address(distributor), up, efee);
