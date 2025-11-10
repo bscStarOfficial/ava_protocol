@@ -17,9 +17,12 @@ contract Register is Initializable, UUPSUpgradeable, RegisterHelper {
         manager = _manager;
     }
 
-    function register(address referrer) external {
-        registerInternal(msg.sender, referrer);
-        emit Registered(msg.sender, referrer);
+    function register(address referral, address referrer) external {
+        bytes32 role = keccak256("REGISTER");
+        require(manager.hasRole(role, msg.sender, '!REGISTER'));
+
+        registerInternal(referral, referrer);
+        emit Registered(referral, referrer);
     }
 
     function setReferrer(address referral, address referrer) external {
