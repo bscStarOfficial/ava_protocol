@@ -9,7 +9,7 @@ import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
 import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
-import {IRegister} from "./interfaces/IReferral.sol";
+import {IRegister} from "./interfaces/IRegister.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 
 contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
@@ -29,7 +29,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     mapping(address => uint256) public tOwnedU;
     mapping(address => uint40) public lastBuyTime;
     address public STAKING;
-    address immutable REFERRAL;
+    address public immutable REGISTER;
 
     struct POOLUStatus {
         uint112 bal; // pool usdt reserve last time update
@@ -69,14 +69,14 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
     constructor(
         address _staking,
-        address _referral,
+        address _register,
         address profitAddress_,
         address marketingAddress_
     ) Owned(msg.sender) ERC20("LAF", "LAF", 18, 1310000 ether) {
         allowance[address(this)][address(uniswapV2Router)] = type(uint256).max;
         IERC20(USDT).approve(address(uniswapV2Router), type(uint256).max);
         STAKING = _staking;
-        REFERRAL = _referral;
+        REGISTER = _register;
         profitAddress = profitAddress_;
         marketingAddress = marketingAddress_;
 
@@ -236,7 +236,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         unchecked {
             swapTokenForUsdt(amountIn, address(distributor));
             uint256 amount = IERC20(USDT).balanceOf(address(distributor));
-            address up = IRegister(REFERRAL).getReferral(_user);
+            address up = IRegister(REGISTER).getReferrer(_user);
             if (up != address(0) && IStaking(STAKING).isPreacher(up)) {
                 uint256 efee = (amount * tokenAmount) / amountIn / 5;
                 IERC20(USDT).transferFrom(address(distributor), up, efee);
