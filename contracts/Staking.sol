@@ -32,8 +32,7 @@ contract Staking is Initializable, UUPSUpgradeable {
     IRegister public immutable REGISTER;
     IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
-    // 30代
-    uint8 public constant maxD = 30;
+    uint8 public constant maxD = 30;     // 30代
 
     IManager public manager;
 
