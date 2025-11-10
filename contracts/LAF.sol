@@ -171,7 +171,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             if (fee > 0) {
                 super._transfer(sender, address(this), fee);
                 if (shouldSwapProfit(fee)) {
-                    swapProfit(fee, sender);
+                    swapProfit(fee);
                 }
             }
             if (shouldSwapTokenForFund(AmountLPFee + AmountMarketingFee)) {
@@ -224,7 +224,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
-    function swapProfit(uint256 tokenAmount, address _user) internal lockTheSwap {
+    function swapProfit(uint256 tokenAmount) internal lockTheSwap {
         uint256 bal = balanceOf[address(this)] -
                     AmountLPFee -
                     AmountMarketingFee;
