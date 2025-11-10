@@ -237,7 +237,7 @@ contract Staking is Owned {
 
     function unstake(uint256 index) external onlyEOA returns (uint256) {
         (uint256 reward, uint256 stake_amount) = burn(index);
-        uint256 bal_this = LAF.balanceOf(address(this));
+        uint256 laf_this = LAF.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
         address[] memory path = new address[](2);
         path = new address[](2);
@@ -245,14 +245,14 @@ contract Staking is Owned {
         path[1] = address(USDT);
         ROUTER.swapTokensForExactTokens(
             reward,
-            bal_this,
+            laf_this,
             path,
             address(this),
             block.timestamp
         );
-        uint256 bal_now = LAF.balanceOf(address(this));
+        uint256 laf_now = LAF.balanceOf(address(this));
         uint256 usdt_now = USDT.balanceOf(address(this));
-        uint256 amount_laf = bal_this - bal_now;
+        uint256 amount_laf = laf_this - laf_now;
         uint256 amount_usdt = usdt_now - usdt_this;
         uint256 interset;
         if (amount_usdt > stake_amount) {
