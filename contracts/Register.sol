@@ -7,7 +7,7 @@ import "./lib/RegisterHelper.sol";
 import "./interfaces/IManager.sol";
 import "hardhat/console.sol";
 
-contract RegisterV2 is Initializable, UUPSUpgradeable, RegisterHelper {
+contract Register is Initializable, UUPSUpgradeable, RegisterHelper {
     IManager public manager;
 
     event Registered(address referral, address referrer);
