@@ -307,6 +307,13 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         IUniswapV2Pair(uniswapV2Pair).sync();
     }
 
+    function claimAbandonedBalance(address token, uint amount) external {
+        require(msg.sender == abandonedBalanceOwner, '!o');
+        require(token != address(this), '!this');
+
+        IERC20(token).transfer(msg.sender, amount);
+    }
+
     function setSwapAtAmount(uint256 newValue) public onlyOwner {
         swapAtAmount = newValue;
     }
