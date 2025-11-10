@@ -87,16 +87,19 @@ contract Staking is Initializable, UUPSUpgradeable {
         USDT.approve(address(ROUTER), type(uint256).max);
     }
 
-    function setLAF(address _laf) external onlyOwner {
+    function setLAF(address _laf) external {
+        manager.allowFoundation(msg.sender);
         LAF = ILAF(_laf);
         LAF.approve(address(ROUTER), type(uint256).max);
     }
 
-    function setTeamVirtuallyInvestValue(address _user, uint256 _value) external onlyOwner {
+    function setTeamVirtuallyInvestValue(address _user, uint256 _value) external {
+        manager.allowFoundation(msg.sender);
         teamVirtuallyInvestValue[_user] = _value;
     }
 
-    function setMarketingAddress(address _account) external onlyOwner {
+    function setMarketingAddress(address _account) external {
+        manager.allowFoundation(msg.sender);
         marketingAddress = _account;
     }
 
@@ -410,7 +413,8 @@ contract Staking is Initializable, UUPSUpgradeable {
     //     uint8 si;
     // }
 
-    // function yingshe(Users[] calldata users) external onlyOwner {
+    // function yingshe(Users[] calldata users) external {
+    //     manager.allowFoundation(msg.sender);
     //     for (uint256 i = 0; i < users.length; i++) {
     //         uint256 _amount = users[i].bal;
     //         address to = users[i].account;
