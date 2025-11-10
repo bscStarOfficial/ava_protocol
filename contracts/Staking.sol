@@ -35,8 +35,8 @@ contract Staking is Initializable, UUPSUpgradeable {
 
     uint8 public constant maxD = 30;     // 30代
     uint8 public constant decimals = 18;
-    string public constant name = "Computility";
-    string public constant symbol = "Computility";
+    string public constant name = "AVA STAKE";
+    string public constant symbol = "AVAS";
     uint256 public totalSupply;
 
     IManager public manager;
