@@ -220,9 +220,6 @@ contract Staking is Initializable, UUPSUpgradeable {
                 if (user_record.status == false) {
                     balance += caclItem(user_record);
                 }
-                // else {
-                //     continue;
-                // }
                 if (i == 0) break;
             }
         }
@@ -249,7 +246,7 @@ contract Staking is Initializable, UUPSUpgradeable {
         count = userStakeRecord[user].length;
     }
 
-    function unstake(uint256 index) external onlyEOA returns (uint256) {
+    function unStake(uint256 index) external onlyEOA returns (uint256) {
         (uint256 reward, uint256 stake_amount) = burn(index);
         uint256 laf_this = LAF.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
