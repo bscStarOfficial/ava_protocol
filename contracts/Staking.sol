@@ -26,6 +26,8 @@ contract Staking is Owned {
         uint256 index
     );
     event Transfer(address indexed from, address indexed to, uint256 amount);
+    IRegister public immutable REGISTER;
+    uint8 immutable maxD = 30;
 
     uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
     uint256[3] public stakeDays = [1 days, 15 days, 30 days];
@@ -35,7 +37,6 @@ contract Staking is Owned {
 
     ILAF public LAF;
 
-    IRegister public REGISTER;
 
     address private marketingAddress;
 
@@ -50,8 +51,6 @@ contract Staking is Owned {
     mapping(address => Record[]) public userStakeRecord;
     mapping(address => uint256) public teamTotalInvestValue;
     mapping(address => uint256) public teamVirtuallyInvestValue;
-
-    uint8 immutable maxD = 30;
 
     RecordTT[] public t_supply;
 
