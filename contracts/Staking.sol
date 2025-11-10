@@ -137,7 +137,7 @@ contract Staking is Owned {
         swapAndAddLiquidity(_amount, amountOutMin);
         address user = msg.sender;
         if (!REGISTER.registered(user)) {
-            REGISTER.bindReferral(parent, user);
+            REGISTER.register(parent, user);
         }
         mint(user, _amount, _stakeIndex);
     }
