@@ -242,6 +242,7 @@ contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
+    // After selling LAF, the price dropped. The USDT allocation decreased, resulting in excess USDT.
     function swapAndLiquify(uint256 tokens) internal {
         IERC20 usdt = IERC20(USDT);
         uint256 half = tokens / 2;
