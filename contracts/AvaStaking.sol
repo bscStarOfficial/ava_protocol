@@ -248,8 +248,6 @@ contract AvaStaking is Owned {
     function unStake(uint256 index) external onlyEOA returns (uint256) {
         (uint256 reward, uint256 stake_amount) = burn(index);
 
-        buyUnStake(reward);
-
         uint256 ava_this = AVA.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
         address[] memory path = new address[](2);
@@ -270,6 +268,7 @@ contract AvaStaking is Owned {
         uint256 interest;
         if (amount_usdt > stake_amount) {
             interest = amount_usdt - stake_amount;
+            buyUnStake(interest);
         }
         uint256 referral_fee = referralReward(msg.sender, interest);
 
@@ -333,6 +332,17 @@ contract AvaStaking is Owned {
         order.stakeTime = uint40(block.timestamp);
         order.amount = uint160(bala - balb);
         userBuyUnStakeRecord[msg.sender].push(order);
+    }
+
+    function redeemBuyUnStake(uint index) external onlyEOA {
+        Record storage record = userBuyUnStakeRecord[msg.sender][index];
+
+        require(record.stakeTime + 86400 <= uint40(block.timestamp), '!time');
+        require(!record.status, 'redeem');
+        record.status = true;
+        record.unStakeTime = uint40(block.timestamp);
+
+        AVA.transfer(msg.sender, uint(record.amount));
     }
 
     function getTeamKpi(address _user) public view returns (uint256) {
