@@ -9,7 +9,7 @@ const {addLiquidity, swapE2T, getAmountsIn} = require("./util/dex");
 const {multiTransfer, multiApprove, getAmountsOut, tokenBalance} = require("./util/common");
 let dead = {address: '0x000000000000000000000000000000000000dEaD'};
 
-let deployer,  marketing, profit, technology, A, B, C, D, E, F, G;
+let deployer, marketing, profit, technology, A, B, C, D, E, F, G;
 let ava, usdt, swap;
 
 async function initialFixture() {
@@ -24,7 +24,7 @@ async function initialFixture() {
   await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
   await multiApprove(ava, [swap])
   // 1U
-  await addLiquidity(deployer, 10000, 10000);
+  await addLiquidity(deployer, 100000, 100000);
 }
 
 describe("发行", function () {
@@ -68,7 +68,39 @@ describe("交易", function () {
     expect(await tokenBalance(ava, technology)).to.eq(25);
     expect(await ava.AmountMarketingFee()).to.eq(30);
   })
-  it('30%盈利手续费进入profit')
+  it('30%盈利手续费进入profit', async function () {
+    // 300
+    let avaAmount = await getAmountsOut(
+      parseEther('300'), [ava.address, usdt.address]
+    );
+    console.log({avaAmount});
+    expect(await tokenBalance(usdt, profit)).to.eq(avaAmount);
+  })
   it('无手续费地址交易不用手续费')
-  it('claimAbandonedBalance')
+
+})
+
+describe('手续费添加流动性', async function () {
+  let abandonedBalance;
+  before(async () => {
+    await initialFixture();
+  })
+  it('买入手续费2.5%构建流动性', async function () {
+    await swapE2T(10000, [usdt, ava], A)
+  })
+  it('触发添加流动性', async function () {
+    // 没有fee到用户转账，触发
+    await ava.transfer(deployer.address, 1);
+  })
+  it('usdt用不完，token合约有残留', async function () {
+    abandonedBalance = await tokenBalance(usdt, ava);
+    expect(abandonedBalance).to.gt(0)
+  })
+
+  it('claimAbandonedBalance提取残留usdt', async function () {
+    await expect(ava.claimAbandonedBalance(usdt.address, abandonedBalance)).to.changeTokenBalance(
+      usdt, deployer, parseEther(abandonedBalance.toString())
+    )
+    expect(await tokenBalance(usdt, ava)).to.eq(0);
+  })
 })
