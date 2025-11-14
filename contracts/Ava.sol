@@ -9,7 +9,6 @@ import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
 import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
-import {IRegister} from "./interfaces/IRegister.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 
 contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
