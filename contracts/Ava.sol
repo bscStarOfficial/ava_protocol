@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
+import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {FirstLaunch} from "./abstract/FirstLaunch.sol";
 import {Owned} from "./abstract/Owned.sol";
 import {ERC20} from "./abstract/token/ERC20.sol";
@@ -49,7 +50,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     function updatePoolReserve() public {
         require(block.timestamp >= poolStatus.t + 1 hours, "1hor");
         poolStatus.t = uint40(block.timestamp);
-        (uint112 reserveU, ,) = getReserves();
+        (uint112 reserveU,) = getReserves();
         poolStatus.bal = reserveU;
     }
 
