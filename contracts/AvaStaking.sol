@@ -26,8 +26,8 @@ contract AvaStaking is Owned {
     );
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    uint256[3] rates = [1000000034670200000,1000000069236900000,1000000138062200000];
-    uint256[3] stakeDays = [1 days,15 days,30 days];
+    uint256[3] public rates = [1000000034670200000,1000000069236900000,1000000138062200000];
+    uint256[3] public stakeDays = [1 days,15 days,30 days];
 
     IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
@@ -35,8 +35,9 @@ contract AvaStaking is Owned {
     IAVA public AVA;
 
     IReferral public REFERRAL;
+    uint public unStakeFee; // 1000
 
-    address marketingAddress;
+    address public marketingAddress;
 
     uint8 public constant decimals = 18;
     string public constant name = "Staked AVA";
@@ -102,6 +103,11 @@ contract AvaStaking is Owned {
 
     function setIsBuyUnStake(bool _isBuyUnStake) external onlyOwner {
         isBuyUnStake = _isBuyUnStake;
+    }
+
+    function setUnStakeFee(uint _unStakeFee) external onlyOwner {
+        require(_unStakeFee < 500, 'max 49%');
+        unStakeFee = _unStakeFee;
     }
 
     function network1In() public view returns (uint256 value) {
