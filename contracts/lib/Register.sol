@@ -3,8 +3,8 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./lib/RegisterHelper.sol";
-import "./interfaces/IManager.sol";
+import "./RegisterHelper.sol";
+import "../interfaces/IManager.sol";
 
 contract Register is Initializable, UUPSUpgradeable, RegisterHelper {
     IManager public manager;
