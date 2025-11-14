@@ -13,7 +13,7 @@ contract Distributor {
 
 abstract contract BaseUSDT {
     bool public inSwapAndLiquify;
-    IUniswapV2Router02 immutable uniswapV2Router;
+    IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
     Distributor public immutable distributor;
     address public immutable USDT;
