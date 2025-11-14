@@ -12,7 +12,7 @@ import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
 import {IRegister} from "./interfaces/IRegister.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 
-contract LAF is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
+contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     bool public presale;
     uint40 public coldTime = 1 minutes;
 

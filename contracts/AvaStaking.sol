@@ -11,7 +11,7 @@ import {ILAF} from "./interfaces/ILAF.sol";
 import {IRegister} from "./interfaces/IRegister.sol";
 import {IManager} from "./interfaces/IManager.sol";
 
-contract Staking is Initializable, UUPSUpgradeable {
+contract AvaStaking is Initializable, UUPSUpgradeable {
     event Staked(
         address indexed user,
         uint256 amount,
