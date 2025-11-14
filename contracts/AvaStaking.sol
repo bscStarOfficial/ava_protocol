@@ -47,6 +47,8 @@ contract AvaStaking is Owned {
     mapping(address => uint256) public userIndex;
 
     mapping(address => Record[]) public userStakeRecord;
+    bool public isBuyUnStake;
+    mapping(address => Record[]) public userBuyUnStakeRecord; // Buy and redeem
     mapping(address => uint256) public teamTotalInvestValue;
     mapping(address => uint256) public teamVirtuallyInvestValue;
 
@@ -96,6 +98,10 @@ contract AvaStaking is Owned {
 
     function setMarketingAddress(address _account) external onlyOwner {
         marketingAddress = _account;
+    }
+
+    function setIsBuyUnStake(bool _isBuyUnStake) external onlyOwner {
+        isBuyUnStake = _isBuyUnStake;
     }
 
     function network1In() public view returns (uint256 value) {
