@@ -20,17 +20,9 @@ module.exports = {
   },
   namedAccounts: {
     deployer: 0,
-    miner: 1, // btn
-    lp: 2,// btn
-    dao: 3,// btn
-    foundation: 4,// btn
-    lv2: 5,// btn
-    income: 6,// btn
-    feeAccount: 7, // bitMiner
-    poolAccount: 8,// reserve
-    reserve1: 8,
-    defaultCommunity: 9, // 默认社区分红地址
-    reserve2: 9,
+    root: 1, // ava
+    marketing: 2,// ava
+    profit: 3,// ava
     A: 10,
     B: 11,
     C: 12,
