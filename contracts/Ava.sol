@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import {FirstLaunch} from "./abstract/FirstLaunch.sol";
 import {Owned} from "./abstract/Owned.sol";
-import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {ERC20} from "./abstract/token/ERC20.sol";
 import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -50,7 +49,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     function updatePoolReserve() public {
         require(block.timestamp >= poolStatus.t + 1 hours, "1hor");
         poolStatus.t = uint40(block.timestamp);
-        (uint112 reserveU, ,) = IUniswapV2Pair(uniswapV2Pair).getReserves();
+        (uint112 reserveU, ,) = getReserves();
         poolStatus.bal = reserveU;
     }
 
@@ -108,9 +107,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
             // buy
             unchecked {
-                (uint112 reserveU, uint112 reserveThis,) = IUniswapV2Pair(
-                    uniswapV2Pair
-                ).getReserves();
+                (uint112 reserveU, uint112 reserveThis) = getReserves();
                 require(amount <= reserveThis / 10, "max cap buy"); //每次买单最多只能卖池子的10%
                 updatePoolReserve(reserveU);
                 uint256 amountUBuy = Helper.getAmountIn(
@@ -139,9 +136,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             require(presale, "pre");
             require(block.timestamp >= lastBuyTime[sender] + coldTime, "cold");
             //sell
-            (uint112 reserveU, uint112 reserveThis,) = IUniswapV2Pair(
-                uniswapV2Pair
-            ).getReserves();
+            (uint112 reserveU, uint112 reserveThis) = getReserves();
             require(amount <= reserveThis / 10, "max cap sell"); //每次卖单最多只能卖池子的20%
             uint256 marketingFee = (amount * marketingFeeRate()) / 1000;
             uint256 amountUOut = Helper.getAmountOut(
