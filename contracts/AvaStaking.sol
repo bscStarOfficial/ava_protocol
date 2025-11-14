@@ -64,6 +64,7 @@ contract AvaStaking is Owned {
         uint160 amount;
         bool status;
         uint8 stakeIndex;
+        uint40 unStakeTime; // Reward at the time of unstake
     }
 
     modifier onlyEOA() {
@@ -290,6 +291,7 @@ contract AvaStaking is Owned {
 
         reward = caclItem(user_record);
         user_record.status = true;
+        user_record.unStakeTime = uint40(block.timestamp);
 
         userIndex[sender] = userIndex[sender] + 1;
 
