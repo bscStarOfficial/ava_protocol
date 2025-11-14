@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {UD60x18, ud} from "@prb/math/src/UD60x18.sol";
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
-import {ILAF} from "./interfaces/ILAF.sol";
-import {IRegister} from "./interfaces/IRegister.sol";
-import {IManager} from "./interfaces/IManager.sol";
+import {IAVA} from "./interfaces/IAVA.sol";
+import {IReferral} from "./interfaces/IReferral.sol";
+import {Owned} from "./abstract/Owned.sol";
+import {_USDT, _ROUTER} from "../lib/Const.sol";
 
-contract AvaStaking is Initializable, UUPSUpgradeable {
+contract AvaStaking is Owned {
     event Staked(
         address indexed user,
         uint256 amount,
@@ -26,32 +25,33 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         uint40 timestamp,
         uint256 index
     );
-
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    IRegister public immutable REGISTER;
-    IUniswapV2Router02 public immutable ROUTER;
-    IERC20 public immutable USDT;
+    uint256[3] rates = [1000000034670200000,1000000069236900000,1000000138062200000];
+    uint256[3] stakeDays = [1 days,15 days,30 days];
 
-    uint8 public constant maxD = 30;     // 30代
+    IUniswapV2Router02 constant ROUTER = IUniswapV2Router02(_ROUTER);
+    IERC20 constant USDT = IERC20(_USDT);
+
+    IAVA public AVA;
+
+    IReferral public REFERRAL;
+
+    address marketingAddress;
+
     uint8 public constant decimals = 18;
-    string public constant name = "AVA STAKE";
-    string public constant symbol = "AVAS";
+    string public constant name = "Staked AVA";
+    string public constant symbol = "sAVA";
+
     uint256 public totalSupply;
-
-    IManager public manager;
-    ILAF public LAF;
-
-    uint256[3] public rates;
-    uint256[3] public stakeDays;
-
-    address private marketingAddress;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public userIndex;
 
     mapping(address => Record[]) public userStakeRecord;
     mapping(address => uint256) public teamTotalInvestValue;
     mapping(address => uint256) public teamVirtuallyInvestValue;
+
+    uint8 immutable maxD = 30;
 
     RecordTT[] public t_supply;
 
@@ -72,36 +72,22 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         _;
     }
 
-    constructor(address REGISTER_, address ROUTER_, address USDT_) {
-        REGISTER = IRegister(REGISTER_);
-        ROUTER = IUniswapV2Router02(ROUTER_);
-        USDT = IERC20(USDT_);
-    }
-
-    function initialize(IManager manager_, address marketingAddress_) initializer public {
-        __UUPSUpgradeable_init();
-
-        manager = manager_;
+    constructor(address REFERRAL_,address marketingAddress_) Owned(msg.sender) {
+        REFERRAL = IReferral(REFERRAL_);
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
-
-        rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
-        stakeDays = [1 days, 15 days, 30 days];
     }
 
-    function setLAF(address _laf) external {
-        manager.allowFoundation(msg.sender);
-        LAF = ILAF(_laf);
-        LAF.approve(address(ROUTER), type(uint256).max);
+    function setAVA(address _ava) external onlyOwner {
+        AVA = IAVA(_ava);
+        AVA.approve(address(ROUTER), type(uint256).max);
     }
 
-    function setTeamVirtuallyInvestValue(address _user, uint256 _value) external {
-        manager.allowFoundation(msg.sender);
+    function setTeamVirtuallyInvestValue(address _user, uint256 _value) external onlyOwner {
         teamVirtuallyInvestValue[_user] = _value;
     }
 
-    function setMarketingAddress(address _account) external {
-        manager.allowFoundation(msg.sender);
+    function setMarketingAddress(address _account) external onlyOwner {
         marketingAddress = _account;
     }
 
@@ -127,7 +113,7 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
 
     function maxStakeAmount() public view returns (uint256) {
         uint256 lastIn = network1In();
-        uint112 reverseu = LAF.getReserveU();
+        uint112 reverseu = AVA.getReserveU();
         uint256 p1 = reverseu / 100;
         if (lastIn > p1) return 0;
         else return Math.min256(p1 - lastIn, 1000 ether);
@@ -150,10 +136,10 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
         address user = msg.sender;
-        if (!REGISTER.registered(user)) {
-            REGISTER.register(parent, user);
+        if (!REFERRAL.isBindReferral(user) && REFERRAL.isBindReferral(parent)) {
+            REFERRAL.bindReferral(parent, user);
         }
-        mint(user, _amount, _stakeIndex);
+        mint(user, _amount,_stakeIndex);
     }
 
     function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin) private {
@@ -162,8 +148,8 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         address[] memory path = new address[](2);
         path = new address[](2);
         path[0] = address(USDT);
-        path[1] = address(LAF);
-        uint256 balb = LAF.balanceOf(address(this));
+        path[1] = address(AVA);
+        uint256 balb = AVA.balanceOf(address(this));
         ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             _amount / 2,
             amountOutMin,
@@ -171,10 +157,10 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
             address(this),
             block.timestamp
         );
-        uint256 bala = LAF.balanceOf(address(this));
+        uint256 bala = AVA.balanceOf(address(this));
         ROUTER.addLiquidity(
             address(USDT),
-            address(LAF),
+            address(AVA),
             _amount / 2,
             bala - balb,
             0, // slippage is unavoidable
@@ -185,7 +171,7 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
     }
 
     function mint(address sender, uint160 _amount, uint8 _stakeIndex) private {
-        require(REGISTER.registered(sender), "!!bind");
+        require(REFERRAL.isBindReferral(sender), "!!bind");
         RecordTT memory tsy;
         tsy.stakeTime = uint40(block.timestamp);
         tsy.tamount = uint160(totalSupply);
@@ -203,16 +189,16 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         uint256 stake_index = cord.length;
         cord.push(order);
 
-        address[] memory referrers = REGISTER.getReferrers(sender, maxD);
-        for (uint8 i = 0; i < referrers.length; i++) {
-            teamTotalInvestValue[referrers[i]] += _amount;
+        address[] memory referrals = REFERRAL.getReferrals(sender, maxD);
+        for (uint8 i = 0; i < referrals.length; i++) {
+            teamTotalInvestValue[referrals[i]] += _amount;
         }
 
         emit Transfer(address(0), sender, _amount);
         emit Staked(sender, _amount, block.timestamp, stake_index, stakeDays[_stakeIndex]);
     }
 
-    function balanceOf(address account) external view returns (uint256 balance){
+    function balanceOf(address account) external view returns (uint256 balance) {
         Record[] storage cord = userStakeRecord[account];
         if (cord.length > 0) {
             for (uint256 i = cord.length - 1; i >= 0; i--) {
@@ -248,22 +234,22 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
 
     function unStake(uint256 index) external onlyEOA returns (uint256) {
         (uint256 reward, uint256 stake_amount) = burn(index);
-        uint256 laf_this = LAF.balanceOf(address(this));
+        uint256 ava_this = AVA.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
         address[] memory path = new address[](2);
         path = new address[](2);
-        path[0] = address(LAF);
+        path[0] = address(AVA);
         path[1] = address(USDT);
         ROUTER.swapTokensForExactTokens(
             reward,
-            laf_this,
+            ava_this,
             path,
             address(this),
             block.timestamp
         );
-        uint256 laf_now = LAF.balanceOf(address(this));
+        uint256 ava_now = AVA.balanceOf(address(this));
         uint256 usdt_now = USDT.balanceOf(address(this));
-        uint256 amount_laf = laf_this - laf_now;
+        uint256 amount_ava = ava_this - ava_now;
         uint256 amount_usdt = usdt_now - usdt_this;
         uint256 interest;
         if (amount_usdt > stake_amount) {
@@ -271,18 +257,18 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         }
         uint256 referral_fee = referrerReward(msg.sender, interest);
 
-        address[] memory referrers = REGISTER.getReferrers(msg.sender, maxD);
-        for (uint8 i = 0; i < referrers.length; i++) {
-            teamTotalInvestValue[referrers[i]] -= stake_amount;
+        address[] memory referrals = REFERRAL.getReferrals(msg.sender, maxD);
+        for (uint8 i = 0; i < referrals.length; i++) {
+            teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
         uint256 team_fee = teamReward(referrers, interest);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
-        LAF.recycle(amount_laf);
+        AVA.recycle(amount_ava);
         return reward;
     }
 
-    function burn(uint256 index) private returns (uint256 reward, uint256 amount){
+    function burn(uint256 index) private returns (uint256 reward, uint256 amount) {
         address sender = msg.sender;
         Record[] storage cord = userStakeRecord[sender];
         Record storage user_record = cord[index];
@@ -312,9 +298,9 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         return balances[user] >= 100e18;
     }
 
-    function referrerReward(address _user, uint256 _interest) private returns (uint256 fee) {
+    function referralReward(address _user, uint256 _interest) private returns (uint256 fee) {
         fee = (_interest * 5) / 100;
-        address up = REGISTER.getReferrer(_user);
+        address up = REFERRAL.getReferral(_user);
         if (up != address(0) && isPreacher(up)) {
             USDT.transfer(up, fee);
         } else {
@@ -322,14 +308,14 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
         }
     }
 
-    function teamReward(address[] memory referrers, uint256 _interest) private returns (uint256 fee) {
+    function teamReward(address[] memory referrals, uint256 _interest) private returns (uint256 fee){
         address top_team;
         uint256 team_kpi;
         uint256 maxTeamRate = 20;
         uint256 spendRate = 0;
         fee = (_interest * maxTeamRate) / 100;
-        for (uint256 i = 0; i < referrers.length; i++) {
-            top_team = referrers[i];
+        for (uint256 i = 0; i < referrals.length; i++) {
+            top_team = referrals[i];
             team_kpi = getTeamKpi(top_team);
             if (
                 team_kpi >= 1000000 * 10 ** 18 &&
@@ -390,52 +376,14 @@ contract AvaStaking is Initializable, UUPSUpgradeable {
 
     function sync() external {
         uint256 w_bal = IERC20(USDT).balanceOf(address(this));
-        address pair = LAF.uniswapV2Pair();
+        address pair = AVA.uniswapV2Pair();
         IERC20(USDT).transfer(pair, w_bal);
         IUniswapV2Pair(pair).sync();
     }
 
-    function emergencyWithdrawLAF(address to, uint256 _amount) external {
-        manager.allowFoundation(msg.sender);
-        LAF.transfer(to, _amount);
+    function emergencyWithdrawAVA(address to, uint256 _amount) external onlyOwner {
+        AVA.transfer(to, _amount);
     }
-
-    // 如果newImplementation没有upgradeTo方法，则无法继续升级
-    function _authorizeUpgrade(address newImplementation) internal view override {
-        manager.allowUpgrade(newImplementation, msg.sender);
-    }
-
-    // struct Users {
-    //     address account;
-    //     uint112 bal;
-    //     uint40 st;
-    //     uint8 si;
-    // }
-
-    // function yingshe(Users[] calldata users) external {
-    //     manager.allowFoundation(msg.sender);
-    //     for (uint256 i = 0; i < users.length; i++) {
-    //         uint256 _amount = users[i].bal;
-    //         address to = users[i].account;
-    //         uint40 stakeTime = users[i].st;
-    //         uint8 stakeIndex = users[i].si;
-
-    //         Record memory order;
-    //         order.stakeTime = stakeTime;
-    //         order.amount = uint160(_amount);
-    //         order.status = false;
-    //         order.stakeIndex = stakeIndex;
-
-    //         totalSupply += _amount;
-    //         balances[to] += _amount;
-    //         Record[] storage cord = userStakeRecord[to];
-    //         uint256 stake_index = cord.length;
-    //         cord.push(order);
-
-    //         emit Transfer(address(0), to, _amount);
-    //         emit Staked(to, _amount, stakeTime, stake_index,stakeDays[stakeIndex]);
-    //     }
-    // }
 }
 
 library Math {
