@@ -261,13 +261,13 @@ contract AvaStaking is Owned {
         if (amount_usdt > stake_amount) {
             interest = amount_usdt - stake_amount;
         }
-        uint256 referral_fee = referrerReward(msg.sender, interest);
+        uint256 referral_fee = referralReward(msg.sender, interest);
 
         address[] memory referrals = REFERRAL.getReferrals(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
-        uint256 team_fee = teamReward(referrers, interest);
+        uint256 team_fee = teamReward(referrals, interest);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
         AVA.recycle(amount_ava);
