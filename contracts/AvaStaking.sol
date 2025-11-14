@@ -8,7 +8,6 @@ import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pa
 import {IAVA} from "./interfaces/IAVA.sol";
 import {IReferral} from "./interfaces/IReferral.sol";
 import {Owned} from "./abstract/Owned.sol";
-import {_USDT, _ROUTER} from "../lib/Const.sol";
 
 contract AvaStaking is Owned {
     event Staked(
@@ -30,8 +29,8 @@ contract AvaStaking is Owned {
     uint256[3] rates = [1000000034670200000,1000000069236900000,1000000138062200000];
     uint256[3] stakeDays = [1 days,15 days,30 days];
 
-    IUniswapV2Router02 constant ROUTER = IUniswapV2Router02(_ROUTER);
-    IERC20 constant USDT = IERC20(_USDT);
+    IUniswapV2Router02 public immutable ROUTER;
+    IERC20 public immutable USDT;
 
     IAVA public AVA;
 
@@ -72,8 +71,15 @@ contract AvaStaking is Owned {
         _;
     }
 
-    constructor(address REFERRAL_,address marketingAddress_) Owned(msg.sender) {
-        REFERRAL = IReferral(REFERRAL_);
+    constructor(
+        IReferral REFERRAL_,
+        address marketingAddress_,
+        IERC20 USDT_,
+        IUniswapV2Router02 ROUTER_
+    ) Owned(msg.sender) {
+        REFERRAL = REFERRAL_;
+        USDT = USDT_;
+        ROUTER = ROUTER_;
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }

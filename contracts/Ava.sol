@@ -8,7 +8,7 @@ import {ERC20} from "./abstract/token/ERC20.sol";
 import {ExcludedFromFeeList} from "./abstract/ExcludedFromFeeList.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
-import {BaseUSDT, USDT} from "./abstract/dex/BaseUSDT.sol";
+import {BaseUSDT} from "./abstract/dex/BaseUSDT.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 
 contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
@@ -68,10 +68,12 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     constructor(
         address _staking,
         address profitAddress_,
-        address marketingAddress_
-    ) Owned(msg.sender) ERC20("LAF", "LAF", 18, 1310000 ether) {
+        address marketingAddress_,
+        address USDT_,
+        address ROUTER_
+    ) Owned(msg.sender) BaseUSDT(USDT_, ROUTER_) ERC20("AVA", "AVA", 18, 1310000 ether) {
         allowance[address(this)][address(uniswapV2Router)] = type(uint256).max;
-        IERC20(USDT).approve(address(uniswapV2Router), type(uint256).max);
+        IERC20(USDT_).approve(address(uniswapV2Router), type(uint256).max);
         STAKING = _staking;
         profitAddress = profitAddress_;
         marketingAddress = marketingAddress_;
