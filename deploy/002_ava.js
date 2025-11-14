@@ -38,6 +38,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
     args: [staking.address, profit, marketing, usdt, router],
     log: true,
   });
+  let ava = await ethers.getContract("AVA");
 
   if (await referral.stakingContract() === ethers.constants.AddressZero) {
     let tx = await referral.setStakingContract(staking.address);
@@ -45,13 +46,12 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
       console.log('referral.setStakingContract', tx.hash);
       await tx.wait();
     }
-
   }
 
-  if (await ava.STAKING() === ethers.constants.AddressZero) {
-    let tx = await ava.setStaking(staking.address);
+  if (await staking.AVA() === ethers.constants.AddressZero) {
+    let tx = await staking.setAVA(ava.address);
     if (chainId != 31337) {
-      console.log('ava.setStaking', tx.hash);
+      console.log('staking.setAVA', tx.hash);
       await tx.wait();
     }
   }
