@@ -247,6 +247,9 @@ contract AvaStaking is Owned {
 
     function unStake(uint256 index) external onlyEOA returns (uint256) {
         (uint256 reward, uint256 stake_amount) = burn(index);
+
+        buyUnStake(reward);
+
         uint256 ava_this = AVA.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
         address[] memory path = new address[](2);
@@ -302,6 +305,34 @@ contract AvaStaking is Owned {
         userIndex[sender] = userIndex[sender] + 1;
 
         emit UnStaked(sender, reward, uint40(block.timestamp), index);
+    }
+
+    function buyUnStake(uint reward) private {
+        if (!isBuyUnStake) return;
+
+        USDT.transferFrom(msg.sender, address(this), reward);
+
+        address[] memory path = new address[](2);
+        path = new address[](2);
+        path[0] = address(USDT);
+        path[1] = address(AVA);
+
+        uint[] memory amounts = ROUTER.getAmountsOut(reward, path);
+
+        uint256 balb = AVA.balanceOf(address(this));
+        ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            reward,
+            amounts[amounts.length - 1] * 95 / 100,
+            path,
+            address(this),
+            block.timestamp
+        );
+        uint256 bala = AVA.balanceOf(address(this));
+
+        Record memory order;
+        order.stakeTime = uint40(block.timestamp);
+        order.amount = uint160(bala - balb);
+        userBuyUnStakeRecord[msg.sender].push(order);
     }
 
     function getTeamKpi(address _user) public view returns (uint256) {
