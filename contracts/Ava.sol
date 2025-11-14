@@ -228,6 +228,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
                     AmountLPFee -
                     AmountMarketingFee;
         uint256 t2 = tokenAmount * 2;
+        // It looks tokenAmount * 2, but it's actually just the current balance minus the fee
         uint256 amountIn = t2 >= bal ? bal : t2;
         unchecked {
             swapTokenForUsdt(amountIn, address(distributor));
