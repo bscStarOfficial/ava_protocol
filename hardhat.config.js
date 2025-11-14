@@ -23,6 +23,7 @@ module.exports = {
     root: 1, // ava
     marketing: 2,// ava
     profit: 3,// ava
+    technology: 4,
     A: 10,
     B: 11,
     C: 12,

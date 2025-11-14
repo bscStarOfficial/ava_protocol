@@ -53,10 +53,9 @@ async function getWallet(name) {
   }
 }
 
-async function getAmountsOut(amountIn, contractAddresses = []) {
-  let router = await ethers.getContract("SwapRouter");
-  let res = await router.getAmountsOut(amountIn, contractAddresses);
-  return res[res.length - 1];
+async function tokenBalance(token, account) {
+  let balance = await token.balanceOf(account.address);
+  return Number(formatEther(balance));
 }
 
 async function multiRegister() {
@@ -100,5 +99,6 @@ async function multiRegisterV3() {
 
 module.exports = {
   getAccounts, getContractByNames, multiApprove, getWallet,
-  getAmountsOut, multiRegister, multiRegisterV3, multiTransfer
+  multiRegister, multiRegisterV3, multiTransfer,
+  tokenBalance
 }
