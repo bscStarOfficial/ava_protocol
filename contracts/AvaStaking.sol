@@ -3,13 +3,13 @@ pragma solidity ^0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {UD60x18, ud} from "@prb/math/src/UD60x18.sol";
-import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {IAVA} from "./interfaces/IAVA.sol";
 import {IReferral} from "./interfaces/IReferral.sol";
 import {Owned} from "./abstract/Owned.sol";
+import {BaseSwap} from "./abstract/dex/BaseSwap.sol";
 
-contract AvaStaking is Owned {
+contract AvaStaking is Owned, BaseSwap {
     event Staked(
         address indexed user,
         uint256 amount,
@@ -29,7 +29,6 @@ contract AvaStaking is Owned {
     uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
     uint256[3] public stakeDays = [1 days, 15 days, 30 days];
 
-    IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
 
     IAVA public AVA;
@@ -79,11 +78,10 @@ contract AvaStaking is Owned {
         IReferral REFERRAL_,
         address marketingAddress_,
         IERC20 USDT_,
-        IUniswapV2Router02 ROUTER_
-    ) Owned(msg.sender) {
+        address ROUTER_
+    ) Owned(msg.sender) BaseSwap(ROUTER_) {
         REFERRAL = REFERRAL_;
         USDT = USDT_;
-        ROUTER = ROUTER_;
         marketingAddress = marketingAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
@@ -164,19 +162,16 @@ contract AvaStaking is Owned {
     function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin) private {
         USDT.transferFrom(msg.sender, address(this), _amount);
 
-        address[] memory path = new address[](2);
-        path = new address[](2);
-        path[0] = address(USDT);
-        path[1] = address(AVA);
         uint256 balb = AVA.balanceOf(address(this));
-        ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        swapExactTokensForTokensSF(
+            address(USDT),
+            address(AVA),
             _amount / 2,
             amountOutMin,
-            path,
-            address(this),
-            block.timestamp
+            address(this)
         );
         uint256 bala = AVA.balanceOf(address(this));
+
         ROUTER.addLiquidity(
             address(USDT),
             address(AVA),
@@ -256,17 +251,14 @@ contract AvaStaking is Owned {
 
         uint256 ava_this = AVA.balanceOf(address(this));
         uint256 usdt_this = USDT.balanceOf(address(this));
-        address[] memory path = new address[](2);
-        path = new address[](2);
-        path[0] = address(AVA);
-        path[1] = address(USDT);
-        ROUTER.swapTokensForExactTokens(
+        swapTokensForExactTokens(
+            address(AVA),
+            address(USDT),
             reward,
             ava_this,
-            path,
-            address(this),
-            block.timestamp
+            address(this)
         );
+
         uint256 ava_now = AVA.balanceOf(address(this));
         uint256 usdt_now = USDT.balanceOf(address(this));
         uint256 amount_ava = ava_this - ava_now;
@@ -314,25 +306,17 @@ contract AvaStaking is Owned {
         emit UnStaked(sender, reward, uint40(block.timestamp), index);
     }
 
-    function buyUnStake(uint reward) private {
+    function buyUnStake(uint interest) private {
         if (!isBuyUnStake) return;
 
-        USDT.transferFrom(msg.sender, address(this), reward);
-
-        address[] memory path = new address[](2);
-        path = new address[](2);
-        path[0] = address(USDT);
-        path[1] = address(AVA);
-
-        uint[] memory amounts = ROUTER.getAmountsOut(reward, path);
-
+        USDT.transferFrom(msg.sender, address(this), interest);
         uint256 balb = AVA.balanceOf(address(this));
-        ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-            reward,
-            amounts[amounts.length - 1] * 95 / 100,
-            path,
-            address(this),
-            block.timestamp
+        swapExactTokensForTokensSF(
+            address(USDT),
+            address(AVA),
+            interest,
+            0,
+            address(this)
         );
         uint256 bala = AVA.balanceOf(address(this));
 
@@ -437,21 +421,15 @@ contract AvaStaking is Owned {
         }
     }
 
-    function buyAVABurn(uint reward) private returns (uint fee) {
-        fee = reward * unStakeFee / 1000;
+    function buyAVABurn(uint amount_usdt) private returns (uint fee) {
+        fee = amount_usdt * unStakeFee / 1000;
         if (fee > 0) {
-            address[] memory path = new address[](2);
-            path = new address[](2);
-            path[0] = address(USDT);
-            path[1] = address(AVA);
-            uint[] memory amounts = ROUTER.getAmountsOut(fee, path);
-
-            ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            swapExactTokensForTokensSF(
+                address(USDT),
+                address(AVA),
                 fee,
-                amounts[amounts.length - 1] * 95 / 100,
-                path,
-                address(0xdead),
-                block.timestamp
+                0,
+                address(0xdead)
             );
         }
     }
