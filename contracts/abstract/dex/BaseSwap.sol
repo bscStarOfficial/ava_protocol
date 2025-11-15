@@ -5,11 +5,10 @@ import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUn
 
 abstract contract BaseSwap {
     IUniswapV2Router02 public immutable ROUTER;
-    uint public immutable slippage;
+    uint public constant slippage = 5;
 
     constructor(address ROUTER_) {
         ROUTER = IUniswapV2Router02(ROUTER_);
-        slippage = 5;
     }
 
     function swapExactTokensForTokensSF(
