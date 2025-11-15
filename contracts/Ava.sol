@@ -184,7 +184,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             AmountMarketingFee += marketingFee;
             TechnologyFee += technologyFee;
 
-            super._transfer(sender, recipient, amount - fee - marketingFee);
+            super._transfer(sender, recipient, amount - fee - marketingFee - technologyFee);
         } else {
             // normal transfer
             super._transfer(sender, recipient, amount);
