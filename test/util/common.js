@@ -97,8 +97,13 @@ async function multiRegisterV3() {
   await register.connect(I).register(H.address);
 }
 
+function toFNumber(number) {
+  return Number(formatEther(number));
+}
+
 module.exports = {
   getAccounts, getContractByNames, multiApprove, getWallet,
   multiRegister, multiRegisterV3, multiTransfer,
-  tokenBalance
+  tokenBalance,
+  toFNumber
 }

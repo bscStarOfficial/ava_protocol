@@ -122,7 +122,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
                 uint256 fee;
                 uint256 burnAmount = balanceOf[address(0xdead)];
                 if (burnAmount < 1000000 * 10 ** 18) {
-                    fee = (amount * 5) / 1000;
+                    fee = (amount * 25) / 1000; // 2.5%
                     fee = 1000000 * 10 ** 18 - burnAmount > fee
                         ? fee
                         : 1000000 * 10 ** 18 - burnAmount;

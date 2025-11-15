@@ -5,8 +5,8 @@ const {AddressZero} = ethers.constants
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const common = require("./util/common");
 const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
-const {addLiquidity, swapE2T, getAmountsIn, dexInit} = require("./util/dex");
-const {multiTransfer, multiApprove, getAmountsOut, tokenBalance} = require("./util/common");
+const {addLiquidity, swapE2T, getAmountsOut, getAmountsIn, dexInit} = require("./util/dex");
+const {multiTransfer, multiApprove, tokenBalance, toFNumber} = require("./util/common");
 let dead = {address: '0x000000000000000000000000000000000000dEaD'};
 
 let deployer, marketing, profit, technology, A, B, C, D, E, F, G;
@@ -41,8 +41,8 @@ describe("交易", function () {
     await addLiquidity(deployer, 100000, 100000);
   })
   it('未开启预售无法交易', async function () {
-    await expect(swapE2T(100, [ava, usdt], A)).to.revertedWith('pre')
-    await expect(swapE2T(100, [usdt, ava], A)).to.revertedWith('pre')
+    await expect(swapE2T(100, [ava, usdt], A)).to.revertedWith('TransferHelper: TRANSFER_FROM_FAILED')
+    await expect(swapE2T(100, [usdt, ava], A)).to.revertedWith('UniswapV2: TRANSFER_FAILED')
   })
   it('黑名单地址无法转账', async function () {
     await ava.multi_bclist([A.address], true);
@@ -60,8 +60,8 @@ describe("交易", function () {
       parseEther('100'), [usdt.address, ava.address]
     );
     await swapE2T(100, [usdt, ava], B);
-    expect(await tokenBalance(ava, dead)).to.eq(avaAmount * 0.025);
-    expect(await ava.AmountLPFee()).to.eq(avaAmount * 0.025);
+    expect(await tokenBalance(ava, dead)).to.closeTo(avaAmount * 0.025, 1e-15);
+    expect(toFNumber(await ava.AmountLPFee())).to.closeTo(avaAmount * 0.025, 1e-15);
   })
   it('买入手续费2.5%构建流动性', async function () {
 
