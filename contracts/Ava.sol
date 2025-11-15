@@ -16,10 +16,12 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     uint40 public coldTime = 1 minutes;
 
     uint256 public AmountMarketingFee;
+    uint256 public TechnologyFee;
     uint256 public AmountLPFee;
 
     address public profitAddress;
     address public marketingAddress;
+    address public technologyAddress;
 
     uint256 public swapAtAmount = 20 ether;
 
@@ -69,6 +71,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         address _staking,
         address profitAddress_,
         address marketingAddress_,
+        address technologyAddress_,
         address USDT_,
         address ROUTER_
     ) Owned(msg.sender) BaseUSDT(USDT_, ROUTER_) ERC20("AVA", "AVA", 18, 1310000 ether) {
@@ -77,12 +80,14 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         STAKING = _staking;
         profitAddress = profitAddress_;
         marketingAddress = marketingAddress_;
+        technologyAddress = technologyAddress_;
 
         excludeFromFee(msg.sender);
         excludeFromFee(address(this));
         excludeFromFee(STAKING);
         excludeFromFee(profitAddress);
         excludeFromFee(marketingAddress);
+        excludeFromFee(technologyAddress);
     }
 
     function _transfer(
@@ -140,8 +145,9 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             (uint112 reserveU, uint112 reserveThis) = getReserves();
             require(amount <= reserveThis / 10, "max cap sell"); //每次卖单最多只能卖池子的20%
             uint256 marketingFee = (amount * marketingFeeRate()) / 1000;
+            uint256 technologyFee = amount * 20 / 1000;
             uint256 amountUOut = Helper.getAmountOut(
-                amount - marketingFee,
+                amount - marketingFee - technologyFee,
                 reserveThis,
                 reserveU
             );
@@ -174,8 +180,10 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             if (shouldSwapTokenForFund(AmountLPFee + AmountMarketingFee)) {
                 swapTokenForFund();
             }
-            super._transfer(sender, address(this), marketingFee);
+            super._transfer(sender, address(this), marketingFee + technologyFee);
             AmountMarketingFee += marketingFee;
+            TechnologyFee += technologyFee;
+
             super._transfer(sender, recipient, amount - fee - marketingFee);
         } else {
             // normal transfer
@@ -307,6 +315,11 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
     function setMarketingAddress(address addr) external onlyOwner {
         marketingAddress = addr;
+        excludeFromFee(addr);
+    }
+
+    function setTechnologyAddress(address addr) external onlyOwner {
+        technologyAddress = addr;
         excludeFromFee(addr);
     }
 
