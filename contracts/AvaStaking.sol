@@ -26,8 +26,8 @@ contract AvaStaking is Owned {
     );
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    uint256[3] public rates = [1000000034670200000,1000000069236900000,1000000138062200000];
-    uint256[3] public stakeDays = [1 days,15 days,30 days];
+    uint256[3] public rates = [1000000034670200000, 1000000069236900000, 1000000138062200000];
+    uint256[3] public stakeDays = [1 days, 15 days, 30 days];
 
     IUniswapV2Router02 public immutable ROUTER;
     IERC20 public immutable USDT;
@@ -158,7 +158,7 @@ contract AvaStaking is Owned {
         if (!REFERRAL.isBindReferral(user) && REFERRAL.isBindReferral(parent)) {
             REFERRAL.bindReferral(parent, user);
         }
-        mint(user, _amount,_stakeIndex);
+        mint(user, _amount, _stakeIndex);
     }
 
     function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin) private {
@@ -184,7 +184,7 @@ contract AvaStaking is Owned {
             bala - balb,
             0, // slippage is unavoidable
             0, // slippage is unavoidable
-            address(0),
+            address(0xdead),
             block.timestamp
         );
     }
@@ -284,7 +284,9 @@ contract AvaStaking is Owned {
         }
         uint256 team_fee = teamReward(referrals, interest);
 
-        USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee);
+        uint256 base_fee = buyAVABurn(amount_usdt);
+
+        USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee - base_fee);
         AVA.recycle(amount_ava);
         return reward;
     }
@@ -432,6 +434,25 @@ contract AvaStaking is Owned {
         }
         if (maxTeamRate > spendRate) {
             USDT.transfer(marketingAddress, fee - ((_interest * spendRate) / 100));
+        }
+    }
+
+    function buyAVABurn(uint reward) private returns (uint fee) {
+        fee = reward * unStakeFee / 1000;
+        if (fee > 0) {
+            address[] memory path = new address[](2);
+            path = new address[](2);
+            path[0] = address(USDT);
+            path[1] = address(AVA);
+            uint[] memory amounts = ROUTER.getAmountsOut(fee, path);
+
+            ROUTER.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                fee,
+                amounts[amounts.length - 1] * 95 / 100,
+                path,
+                address(0xdead),
+                block.timestamp
+            );
         }
     }
 
