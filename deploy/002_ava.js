@@ -10,7 +10,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
 
   if (chainId != 56) {
     usdt = (await ethers.getContract("USDT")).address;
-    router = (await ethers.getContract("RouterMock")).address;
+    router = (await ethers.getContract("UniswapV2Router02")).address;
   } else {
     usdt = '0x55d398326f99059fF775485246999027B3197955';
     router = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
