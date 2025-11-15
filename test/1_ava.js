@@ -5,26 +5,21 @@ const {AddressZero} = ethers.constants
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const common = require("./util/common");
 const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
-const {addLiquidity, swapE2T, getAmountsIn} = require("./util/dex");
+const {addLiquidity, swapE2T, getAmountsIn, dexInit} = require("./util/dex");
 const {multiTransfer, multiApprove, getAmountsOut, tokenBalance} = require("./util/common");
 let dead = {address: '0x000000000000000000000000000000000000dEaD'};
 
 let deployer, marketing, profit, technology, A, B, C, D, E, F, G;
-let ava, usdt, swap;
+let ava, usdt, router;
 
 async function initialFixture() {
   await deployments.fixture();
+  await dexInit();
 
-  [ava, usdt, swap] = await common.getContractByNames(["AVA", 'USDT', 'SwapMock']);
+  [ava, usdt, router] = await common.getContractByNames(["AVA", 'USDT', 'UniswapV2Router02']);
   [deployer, marketing, profit, technology, A, B, C, D, E, F, G] = await common.getAccounts(
     ["deployer", "marketing", "profit", "technology", "A", "B", "C", "D", "E", "F", "G"]
   );
-
-  await multiTransfer(ava, deployer, [A, B, C, D], 10000);
-  await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
-  await multiApprove(ava, [swap])
-  // 1U
-  await addLiquidity(deployer, 100000, 100000);
 }
 
 describe("发行", function () {
@@ -32,11 +27,19 @@ describe("发行", function () {
     await initialFixture();
   })
   it('AVA总发行量131万枚', async function () {
-    expect(await ava.totalSupply()).to.equal(1310000 * 1e18);
-    expect(await ava.balanceOf(deployer)).to.equal(1310000 * 1e18);
+    expect(await ava.totalSupply()).to.equal(parseEther('1310000'));
+    expect(await ava.balanceOf(deployer.address)).to.equal(parseEther('1310000'));
   });
 })
 describe("交易", function () {
+  before(async () => {
+    await multiTransfer(ava, deployer, [A, B, C, D], 10000);
+    await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
+    await multiApprove(ava, [router])
+    await multiApprove(usdt, [router])
+    // 1U
+    await addLiquidity(deployer, 100000, 100000);
+  })
   it('未开启预售无法交易', async function () {
     await expect(swapE2T(100, [ava, usdt], A)).to.revertedWith('pre')
     await expect(swapE2T(100, [usdt, ava], A)).to.revertedWith('pre')
@@ -77,7 +80,6 @@ describe("交易", function () {
     expect(await tokenBalance(usdt, profit)).to.eq(avaAmount);
   })
   it('无手续费地址交易不用手续费')
-
 })
 
 describe('手续费添加流动性', async function () {
