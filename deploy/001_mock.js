@@ -21,7 +21,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
     log: true,
   });
 
-  await deploy('FactoryMock', {
+  await deploy('UniswapV2Factory', {
     from: deployer,
     gasLimit: 30000000,
     args: [deployer],
@@ -29,9 +29,9 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   });
 
   let wbnb = await ethers.getContract("WBNB");
-  let factory = await ethers.getContract("FactoryMock");
+  let factory = await ethers.getContract("UniswapV2Factory");
 
-  await deploy('RouterMock', {
+  await deploy('UniswapV2Router02', {
     from: deployer,
     gasLimit: 30000000,
     args: [factory.address, wbnb.address],
