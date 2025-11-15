@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
-abstract contract Swap {
+abstract contract BaseSwap {
     IUniswapV2Router02 public immutable ROUTER;
     uint public immutable slippage;
 
