@@ -276,7 +276,6 @@ contract AvaStaking is Owned, BaseSwap {
         uint256 interest;
         if (amount_usdt > stake_amount) {
             interest = amount_usdt - stake_amount;
-            buyUnStake(interest);
         }
         // 5%
         uint256 referral_fee = referralReward(msg.sender, interest);
@@ -298,6 +297,9 @@ contract AvaStaking is Owned, BaseSwap {
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee - technology_fee - market_fee - base_fee);
         AVA.recycle(amount_ava);
+
+        buyUnStake(interest);
+
         return reward;
     }
 
@@ -325,7 +327,7 @@ contract AvaStaking is Owned, BaseSwap {
     }
 
     function buyUnStake(uint interest) private {
-        if (!isBuyUnStake) return;
+        if (!isBuyUnStake || interest == 0) return;
 
         USDT.transferFrom(msg.sender, address(this), interest);
         uint256 balb = AVA.balanceOf(address(this));
