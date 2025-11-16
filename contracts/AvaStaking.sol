@@ -294,11 +294,10 @@ contract AvaStaking is Owned, BaseSwap {
         USDT.transfer(marketingAddress, market_fee);
 
         uint256 base_fee = buyAVABurn(amount_usdt);
+        buyUnStake(interest);
 
         USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee - technology_fee - market_fee - base_fee);
         AVA.recycle(amount_ava);
-
-        buyUnStake(interest);
 
         return reward;
     }
