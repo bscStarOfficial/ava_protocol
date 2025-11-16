@@ -115,6 +115,10 @@ contract AvaStaking is Owned, BaseSwap {
         unStakeFee = _unStakeFee;
     }
 
+    function setStakeDays(uint[3] memory stakeDays_) external onlyOwner {
+        stakeDays = stakeDays_;
+    }
+
     // The amount of staking in the last minute
     function network1In() public view returns (uint256 value) {
         uint256 len = t_supply.length;
