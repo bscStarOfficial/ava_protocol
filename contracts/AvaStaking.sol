@@ -360,7 +360,7 @@ contract AvaStaking is Owned, BaseSwap {
     }
 
     function isPreacher(address user) public view returns (bool) {
-        return balances[user] >= 100e18;
+        return balances[user] >= 200 ether;
     }
 
     function referralReward(address _user, uint256 _interest) private returns (uint256 fee) {
