@@ -361,62 +361,68 @@ contract AvaStaking is Owned, BaseSwap {
     function teamReward(address[] memory referrals, uint256 _interest) private returns (uint256 fee){
         address top_team;
         uint256 team_kpi;
-        uint256 maxTeamRate = 20;
+        uint256 maxTeamRate = 24;
         uint256 spendRate = 0;
         fee = (_interest * maxTeamRate) / 100;
         for (uint256 i = 0; i < referrals.length; i++) {
             top_team = referrals[i];
+            if (!isPreacher(top_team)) continue;
+
             team_kpi = getTeamKpi(top_team);
             if (
-                team_kpi >= 1000000 * 10 ** 18 &&
-                maxTeamRate > spendRate &&
-                isPreacher(top_team)
+                team_kpi >= 300_0000 ether &&
+                maxTeamRate > spendRate
             ) {
                 USDT.transfer(
                     top_team,
                     (_interest * (maxTeamRate - spendRate)) / 100
                 );
+                spendRate = maxTeamRate;
+            }
+
+            if (
+                team_kpi >= 100_0000 ether &&
+                team_kpi < 300_0000 ether &&
+                spendRate < 20
+            ) {
+                USDT.transfer(top_team, (_interest * (20 - spendRate)) / 100);
                 spendRate = 20;
             }
 
             if (
-                team_kpi >= 500000 * 10 ** 18 &&
-                team_kpi < 1000000 * 10 ** 18 &&
-                spendRate < 16 &&
-                isPreacher(top_team)
+                team_kpi >= 50_0000 ether &&
+                team_kpi < 100_0000 ether &&
+                spendRate < 17
             ) {
-                USDT.transfer(top_team, (_interest * (16 - spendRate)) / 100);
-                spendRate = 16;
+                USDT.transfer(top_team, (_interest * (17 - spendRate)) / 100);
+                spendRate = 17;
             }
 
             if (
-                team_kpi >= 100000 * 10 ** 18 &&
-                team_kpi < 500000 * 10 ** 18 &&
-                spendRate < 12 &&
-                isPreacher(top_team)
+                team_kpi >= 10_0000 ether &&
+                team_kpi < 50_0000 ether &&
+                spendRate < 13
             ) {
-                USDT.transfer(top_team, (_interest * (12 - spendRate)) / 100);
-                spendRate = 12;
+                USDT.transfer(top_team, (_interest * (13 - spendRate)) / 100);
+                spendRate = 13;
             }
 
             if (
-                team_kpi >= 50000 * 10 ** 18 &&
-                team_kpi < 100000 * 10 ** 18 &&
-                spendRate < 8 &&
-                isPreacher(top_team)
+                team_kpi >= 5_0000 ether &&
+                team_kpi < 10_0000 ether &&
+                spendRate < 9
             ) {
-                USDT.transfer(top_team, (_interest * (8 - spendRate)) / 100);
-                spendRate = 8;
+                USDT.transfer(top_team, (_interest * (9 - spendRate)) / 100);
+                spendRate = 9;
             }
 
             if (
-                team_kpi >= 10000 * 10 ** 18 &&
-                team_kpi < 50000 * 10 ** 18 &&
-                spendRate < 4 &&
-                isPreacher(top_team)
+                team_kpi >= 1_0000 ether &&
+                team_kpi < 5_0000 ether &&
+                spendRate < 5
             ) {
-                USDT.transfer(top_team, (_interest * (4 - spendRate)) / 100);
-                spendRate = 4;
+                USDT.transfer(top_team, (_interest * (5 - spendRate)) / 100);
+                spendRate = 5;
             }
         }
         if (maxTeamRate > spendRate) {
