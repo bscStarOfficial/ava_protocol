@@ -164,10 +164,10 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
                     reserveU,
                     reserveThis
                 );
-                fee = profitThis / 4;
+                fee = profitThis * 3 / 10;
                 tOwnedU[sender] = 0;
             } else {
-                fee = amount / 4;
+                fee = amount * 3 / 10;
                 tOwnedU[sender] = 0;
             }
 
