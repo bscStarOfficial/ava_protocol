@@ -278,17 +278,25 @@ contract AvaStaking is Owned, BaseSwap {
             interest = amount_usdt - stake_amount;
             buyUnStake(interest);
         }
+        // 5%
         uint256 referral_fee = referralReward(msg.sender, interest);
 
         address[] memory referrals = REFERRAL.getReferrals(msg.sender, maxD);
         for (uint8 i = 0; i < referrals.length; i++) {
             teamTotalInvestValue[referrals[i]] -= stake_amount;
         }
+        // 24%
         uint256 team_fee = teamReward(referrals, interest);
+        // 0.5%
+        uint256 technology_fee = interest * 5 / 1000;
+        USDT.transfer(technologyAddress, technology_fee);
+        // 0.5%
+        uint256 market_fee = interest * 5 / 1000;
+        USDT.transfer(marketingAddress, market_fee);
 
         uint256 base_fee = buyAVABurn(amount_usdt);
 
-        USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee - base_fee);
+        USDT.transfer(msg.sender, amount_usdt - referral_fee - team_fee - technology_fee - market_fee - base_fee);
         AVA.recycle(amount_ava);
         return reward;
     }
