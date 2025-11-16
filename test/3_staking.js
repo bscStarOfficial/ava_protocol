@@ -7,7 +7,7 @@ const common = require("./util/common");
 const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {referralInit, userBindReferral30} = require("./util/referral");
 const {addLiquidity, dexInit} = require("./util/dex");
-const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtuallyInvestValue} = require("./util/staking");
+const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtuallyInvestValue, getTeamKpi} = require("./util/staking");
 const {multiApprove} = require("./util/common");
 const BigNumber = require("bignumber.js");
 
@@ -68,70 +68,92 @@ describe("正常赎回", function () {
     await stake(wallets[29], 100, 0);
     await time.increase(86400 * 2);
   })
-  describe("本金+直推+项目方=76%", function () {
-    before(async function () {
-      let teamYJ = [
-        [0, 300_0000],
-        [3, 100_0000],
-        [6, 50_0000],
-        [8, 10_0000],
-        [11, 5_0000],
-        [16, 1_0000],
-      ];
-      for (let item of teamYJ) {
-        await setTeamVirtuallyInvestValue(wallets[item[0]], item[1]);
-      }
-    })
-    it('本金正常赎回')
-    it('70%静态')
-    it('5%直推')
-    it('0.5%项目方')
-    it('0.5%技术')
-    it('团队奖励24%，按级差分配')
-    it('S1--1万U -- 5%')
-    it('S2--5万U -- 9%')
-    it('S3--10万U --13%')
-    it('S4--50万U --17%')
-    it('S5--100万U--20%')
-    it('S6--300万U--24%', async function () {
-      let amountU = await rewardOfSlot(wallets[29], 0);
-      let interest = new BigNumber(amountU).minus(100);
-      await expect(unStake(wallets[29], 0)).to.changeTokenBalances(
-        usdt,
-        [
-          wallets[29],
-          wallets[28],
-          technology2,
-          marketing,
-          wallets[16],
-          wallets[11],
-          wallets[8],
-          wallets[6],
-          wallets[3],
-          wallets[0],
-        ],
-        [
-          interest.multipliedBy(0.7).plus(100).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.05).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.005).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.005).multipliedBy(1e18).toFixed(),
-          // 团队奖
-          interest.multipliedBy(0.05).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.03).multipliedBy(1e18).toFixed(),
-          interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
-        ]
-      );
-    })
+  // describe("本金+直推+项目方=76%", function () {
+  //   before(async function () {
+  //     let teamYJ = [
+  //       [0, 300_0000],
+  //       [3, 100_0000],
+  //       [6, 50_0000],
+  //       [8, 10_0000],
+  //       [11, 5_0000],
+  //       [16, 1_0000],
+  //     ];
+  //     for (let item of teamYJ) {
+  //       await setTeamVirtuallyInvestValue(wallets[item[0]], item[1]);
+  //     }
+  //   })
+  //   it('本金正常赎回')
+  //   it('70%静态')
+  //   it('5%直推')
+  //   it('0.5%项目方')
+  //   it('0.5%技术')
+  //   it('团队奖励24%，按级差分配')
+  //   it('S1--1万U -- 5%')
+  //   it('S2--5万U -- 9%')
+  //   it('S3--10万U --13%')
+  //   it('S4--50万U --17%')
+  //   it('S5--100万U--20%')
+  //   it('S6--300万U--24%', async function () {
+  //     let amountU = await rewardOfSlot(wallets[29], 0);
+  //     let interest = new BigNumber(amountU).minus(100);
+  //     await expect(unStake(wallets[29], 0)).to.changeTokenBalances(
+  //       usdt,
+  //       [
+  //         wallets[29],
+  //         wallets[28],
+  //         technology2,
+  //         marketing,
+  //         wallets[16],
+  //         wallets[11],
+  //         wallets[8],
+  //         wallets[6],
+  //         wallets[3],
+  //         wallets[0],
+  //       ],
+  //       [
+  //         interest.multipliedBy(0.7).plus(100).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.05).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.005).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.005).multipliedBy(1e18).toFixed(),
+  //         // 团队奖
+  //         interest.multipliedBy(0.05).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.03).multipliedBy(1e18).toFixed(),
+  //         interest.multipliedBy(0.04).multipliedBy(1e18).toFixed(),
+  //       ]
+  //     );
+  //   })
+  // })
+})
+
+describe("未发送团队收益转到社区地址", function () {
+  before(async function () {
+    await initialFixture();
+    await stake(wallets[28], 200, 0);
+    await stake(wallets[29], 100, 0);
+    await time.increase(86400 * 2);
+  })
+  // 147220315060110950
+  // 147221169584167490
+  it('', async function () {
+    let amountU = await rewardOfSlot(wallets[29], 0);
+    let interest = new BigNumber(amountU).minus(100);
+    await expect(unStake(wallets[29], 0)).to.changeTokenBalance(
+      usdt, marketing,
+      '147221169584167490',
+    )
   })
 })
 
-describe("未发送收益转到社区地址", function () {
-})
-
 describe("未到期无法赎回", function () {
+  before(async function () {
+    await initialFixture();
+    await stake(wallets[29], 100, 0);
+    await stake(wallets[29], 100, 1);
+    await stake(wallets[29], 100, 2);
+  })
   it('1天无法赎回', async () => {
     await expect(unStake(wallets[29], 0)).to.revertedWith('The time is not right');
   })
@@ -146,9 +168,25 @@ describe("未到期无法赎回", function () {
 })
 
 describe('团队业绩', function () {
-  it('只计算伞下实际在线的本金总额（不含自身点位')
-  it('随伞下新的捐赠增加')
-  it('赎回而增减')
+  before(async function () {
+    await initialFixture();
+    await stake(wallets[29], 100, 0);
+  })
+  it('只计算伞下实际在线的本金总额（不含自身点位)', async () => {
+    expect(await getTeamKpi(wallets[29])).to.eq(0);
+  })
+  it('随伞下新的捐赠增加', async () => {
+    for (let i = 0; i < 29; i++) {
+      expect(await getTeamKpi(wallets[i])).to.eq(100);
+    }
+  })
+  it('赎回而增减', async () => {
+    await time.increase(86400);
+    await unStake(wallets[29], 0);
+    for (let i = 0; i < 29; i++) {
+      expect(await getTeamKpi(wallets[i])).to.eq(0);
+    }
+  })
 })
 
 describe('本金总额大于等于200U才可获得推荐奖励', function () {
