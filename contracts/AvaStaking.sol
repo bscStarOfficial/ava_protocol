@@ -108,6 +108,7 @@ contract AvaStaking is Owned, BaseSwap {
         unStakeFee = _unStakeFee;
     }
 
+    // The amount of staking in the last minute
     function network1In() public view returns (uint256 value) {
         uint256 len = t_supply.length;
         if (len == 0) return 0;
@@ -128,6 +129,8 @@ contract AvaStaking is Owned, BaseSwap {
         return totalSupply - last_supply;
     }
 
+    // One percent of the pool minus the amount staked in the most recent minute,
+    // with a maximum of 100.
     function maxStakeAmount() public view returns (uint256) {
         uint256 lastIn = network1In();
         uint112 reverseu = AVA.getReserveU();
