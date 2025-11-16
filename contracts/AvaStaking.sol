@@ -477,6 +477,42 @@ contract AvaStaking is Owned, BaseSwap {
         AVA.transfer(to, _amount);
     }
 
+    function getUserRecords(
+        address _user,
+        uint256 _offset,
+        uint256 _limit,
+        uint8 _status, // 0: ongoing, 1: redeemed,
+        uint8 _listType
+    ) external view returns (Record[] memory records, uint256 total) {
+        Record[] storage allRecords =
+            _listType == 0 ? userStakeRecord[_user] : userUnStakeRecord[_user];
+        uint256 allRecordsCount = allRecords.length;
+        bool targetStatus = (_status == 1);
+
+        Record[] memory resultPage = new Record[](_limit);
+        uint256 resultCount = 0;
+        uint256 totalFilteredCount = 0;
+
+        for (uint256 i = allRecordsCount; i > 0; i--) { // Newest first
+            uint256 index = i - 1;
+            if (allRecords[index].status == targetStatus) {
+                if (totalFilteredCount >= _offset && resultCount < _limit) {
+                    resultPage[resultCount] = allRecords[index];
+                    resultCount++;
+                }
+                totalFilteredCount++;
+            }
+        }
+
+        // Resize the array to the actual number of records found for the page.
+        records = new Record[](resultCount);
+        for (uint256 j = 0; j < resultCount; j++) {
+            records[j] = resultPage[j];
+        }
+
+        return (records, totalFilteredCount);
+    }
+
     function claimAbandonedBalance(address token, uint amount) external {
         require(msg.sender == abandonedBalanceOwner, '!o');
         require(token != address(AVA), '!ava');
