@@ -127,4 +127,16 @@ contract Referral is IReferral, Owned {
 
         emit BindReferral(_user, _referral);
     }
+
+    function userBindReferral(address _referral) external {
+        address _user = msg.sender;
+        require(_referral != address(0), "Referral is zero address");
+        require(_referrals[_user] == address(0), "User already has a referral");
+        require(_referrals[_referral] != address(0), "Referral is not bound");
+
+        _referrals[_user] = _referral;
+        _children[_referral].push(_user);
+
+        emit BindReferral(_user, _referral);
+    }
 }
