@@ -3,7 +3,7 @@ const {parseEther, parseUnits, keccak256, toUtf8Bytes} = require("ethers/lib/uti
 
 module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAccounts}) => {
   const {deploy} = deployments;
-  let {deployer, root, marketing, technology, profit} = await getNamedAccounts();
+  let {deployer, root, marketing, technology, technology2, profit} = await getNamedAccounts();
   const chainId = await getChainId()
 
   let usdt, router;
@@ -27,7 +27,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   await deploy('AvaStaking', {
     from: deployer,
     gasLimit: 30000000,
-    args: [referral.address, marketing, usdt, router],
+    args: [referral.address, marketing, technology2, usdt, router],
     log: true,
   });
   let staking = await ethers.getContract("AvaStaking");
