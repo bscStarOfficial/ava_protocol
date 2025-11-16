@@ -346,7 +346,7 @@ contract AvaStaking is Owned, BaseSwap {
         userUnStakeRecord[msg.sender].push(order);
     }
 
-    function redeemBuyUnStake(uint index) external onlyEOA {
+    function redeemUnStake(uint index) external onlyEOA {
         Record storage record = userUnStakeRecord[msg.sender][index];
 
         require(record.stakeTime + 86400 < uint40(block.timestamp), '!time');
