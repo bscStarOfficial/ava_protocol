@@ -10,6 +10,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Helper} from "./lib/Helper.sol";
 import {BaseUSDT} from "./abstract/dex/BaseUSDT.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
+// import "hardhat/console.sol";
 
 contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     bool public presale;
@@ -209,6 +210,10 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
+    function swapTokenForFundByOwner() external onlyOwner {
+        swapTokenForFund();
+    }
+
     function swapTokenForFund() internal lockTheSwap {
         if (AmountMarketingFee > 0) {
             swapTokenForUsdt(AmountMarketingFee, marketingAddress);
@@ -248,7 +253,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         }
     }
 
-    // After selling AVA, the price dropped. The USDT allocation decreased, resulting in excess USDT.
+    // When tokens is large,  The USDT allocation decreased, resulting in excess USDT.
     function swapAndLiquify(uint256 tokens) internal {
         IERC20 usdt = IERC20(USDT);
         uint256 half = tokens / 2;

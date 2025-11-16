@@ -4,7 +4,7 @@ const {parseEther, formatEther, parseUnits, solidityKeccak256} = require("ethers
 const {AddressZero} = ethers.constants
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const common = require("./util/common");
-const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
+const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {addLiquidity, swapE2T, getAmountsOut, getAmountsIn, dexInit} = require("./util/dex");
 const {multiTransfer, multiApprove, tokenBalance, toFNumber} = require("./util/common");
 let dead = {address: '0x000000000000000000000000000000000000dEaD'};
@@ -32,6 +32,7 @@ describe("发行", function () {
   });
 })
 describe("交易", function () {
+  let profitFee;
   before(async () => {
     await multiTransfer(ava, deployer, [A, B, C, D], 10000);
     await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
@@ -41,8 +42,8 @@ describe("交易", function () {
     await addLiquidity(deployer, 100000, 100000);
   })
   it('未开启预售无法交易', async function () {
-    await expect(swapE2T(100, [ava, usdt], A)).to.revertedWith('TransferHelper: TRANSFER_FROM_FAILED')
-    await expect(swapE2T(100, [usdt, ava], A)).to.revertedWith('UniswapV2: TRANSFER_FAILED')
+    await expect(swapE2T(100, [ava, usdt], A)).to.revertedWith('pre')
+    await expect(swapE2T(100, [usdt, ava], A)).to.revertedWith('pre')
   })
   it('黑名单地址无法转账', async function () {
     await ava.multi_bclist([A.address], true);
@@ -54,6 +55,8 @@ describe("交易", function () {
   })
   it('开启预售', async function () {
     await ava.setPresale();
+    // 15分钟后 marketingFeeRate = 30
+    await time.increase(60 * 15);
   })
   it('买入手续费2.5%销毁', async function () {
     let avaAmount = await getAmountsOut(
@@ -67,17 +70,21 @@ describe("交易", function () {
 
   })
   it('卖出手续费3%进入市场、2%进入技术', async function () {
-    await swapE2T(1000, [ava, usdt], B);
-    expect(await tokenBalance(ava, technology)).to.eq(25);
-    expect(await ava.AmountMarketingFee()).to.eq(30);
+    // profit fee
+    profitFee = await getAmountsOut(
+      parseEther('300'), [ava.address, usdt.address]
+    );
+    await swapE2T(1000, [ava, usdt], A);
+    expect(
+      toFNumber(await ava.AmountMarketingFee())
+    ).to.eq(30);
+    expect(
+      toFNumber(await ava.TechnologyFee())
+    ).to.eq(20);
   })
   it('30%盈利手续费进入profit', async function () {
     // 300
-    let avaAmount = await getAmountsOut(
-      parseEther('300'), [ava.address, usdt.address]
-    );
-    console.log({avaAmount});
-    expect(await tokenBalance(usdt, profit)).to.eq(avaAmount);
+    expect(await tokenBalance(usdt, profit)).to.eq(profitFee);
   })
   it('无手续费地址交易不用手续费')
 })
@@ -86,13 +93,21 @@ describe('手续费添加流动性', async function () {
   let abandonedBalance;
   before(async () => {
     await initialFixture();
+    await multiTransfer(ava, deployer, [A, B, C, D], 10000);
+    await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
+    await multiApprove(ava, [router])
+    await multiApprove(usdt, [router])
+    // 1U
+    await addLiquidity(deployer, 100000, 100000);
+    await ava.setPresale();
+    // 15分钟后 marketingFeeRate = 30
+    await time.increase(60 * 15);
   })
   it('买入手续费2.5%构建流动性', async function () {
     await swapE2T(10000, [usdt, ava], A)
   })
   it('触发添加流动性', async function () {
-    // 没有fee到用户转账，触发
-    await ava.transfer(deployer.address, 1);
+    await ava.swapTokenForFundByOwner();
   })
   it('usdt用不完，token合约有残留', async function () {
     abandonedBalance = await tokenBalance(usdt, ava);
