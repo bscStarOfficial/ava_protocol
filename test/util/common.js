@@ -58,6 +58,11 @@ async function tokenBalance(token, account) {
   return Number(formatEther(balance));
 }
 
+async function tokenTransfer(token, from, to, amount) {
+  amount = parseEther(amount.toString());
+  await token.connect(from).transfer(to.address, amount);
+}
+
 async function multiRegister() {
   let registerV2 = await ethers.getContract("RegisterV2");
   let [A, B, C, D, E, F, G, H, I, J] = await getAccounts(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]);
@@ -106,5 +111,6 @@ module.exports = {
   getAccounts, getContractByNames, multiApprove, getWallet,
   multiRegister, multiRegisterV3, multiTransfer,
   tokenBalance,
+  tokenTransfer,
   toFNumber,
 }

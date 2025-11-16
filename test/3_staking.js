@@ -8,7 +8,7 @@ const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {referralInit, userBindReferral30} = require("./util/referral");
 const {addLiquidity, dexInit} = require("./util/dex");
 const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtuallyInvestValue, getTeamKpi, isPreacher, redeemUnStake} = require("./util/staking");
-const {multiApprove, tokenBalance} = require("./util/common");
+const {multiApprove, tokenBalance, tokenTransfer} = require("./util/common");
 const BigNumber = require("bignumber.js");
 
 let deployer, root, technology2, marketing;
@@ -42,6 +42,15 @@ describe('开启买入赎回机制', function () {
     await time.increase(86400);
     let amountU = await rewardOfSlot(wallets[29], 0);
     let interest = new BigNumber(amountU).minus(100);
+    await tokenTransfer(usdt, wallets[29], deployer,
+      await tokenBalance(usdt, wallets[29])
+    );
+
+    await expect(unStake(wallets[29], 0)).to.be.reverted;
+
+    await tokenTransfer(usdt, deployer, wallets[29],
+      interest.multipliedBy(10001).dividedBy(10000).toNumber()
+    );
     await unStake(wallets[29], 0);
   })
   it('24小时后赎回 AVA', async function () {
