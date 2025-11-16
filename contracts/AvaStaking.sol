@@ -447,6 +447,13 @@ contract AvaStaking is Owned, BaseSwap {
     function emergencyWithdrawAVA(address to, uint256 _amount) external onlyOwner {
         AVA.transfer(to, _amount);
     }
+
+    function claimAbandonedBalance(address token, uint amount) external {
+        require(msg.sender == abandonedBalanceOwner, '!o');
+        require(token != address(AVA), '!ava');
+
+        IERC20(token).transfer(msg.sender, amount);
+    }
 }
 
 library Math {
