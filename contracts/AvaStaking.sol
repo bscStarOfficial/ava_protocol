@@ -49,7 +49,7 @@ contract AvaStaking is Owned, BaseSwap {
 
     mapping(address => Record[]) public userStakeRecord;
     bool public isBuyUnStake;
-    mapping(address => Record[]) public userBuyUnStakeRecord; // Buy and redeem
+    mapping(address => Record[]) public userUnStakeRecord; // Buy and redeem
     mapping(address => uint256) public teamTotalInvestValue;
     mapping(address => uint256) public teamVirtuallyInvestValue;
 
@@ -343,11 +343,11 @@ contract AvaStaking is Owned, BaseSwap {
         Record memory order;
         order.stakeTime = uint40(block.timestamp);
         order.amount = uint160(bala - balb);
-        userBuyUnStakeRecord[msg.sender].push(order);
+        userUnStakeRecord[msg.sender].push(order);
     }
 
     function redeemBuyUnStake(uint index) external onlyEOA {
-        Record storage record = userBuyUnStakeRecord[msg.sender][index];
+        Record storage record = userUnStakeRecord[msg.sender][index];
 
         require(record.stakeTime + 86400 < uint40(block.timestamp), '!time');
         require(!record.status, 'redeem');
