@@ -83,6 +83,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
         marketingAddress = marketingAddress_;
         technologyAddress = technologyAddress_;
 
+        excludeFromFee(address(0xdead));
         excludeFromFee(msg.sender);
         excludeFromFee(address(this));
         excludeFromFee(STAKING);
