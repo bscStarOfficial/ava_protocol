@@ -102,8 +102,9 @@ function toFNumber(number) {
 }
 
 module.exports = {
+  dead: {address: '0x000000000000000000000000000000000000dEaD'},
   getAccounts, getContractByNames, multiApprove, getWallet,
   multiRegister, multiRegisterV3, multiTransfer,
   tokenBalance,
-  toFNumber
+  toFNumber,
 }

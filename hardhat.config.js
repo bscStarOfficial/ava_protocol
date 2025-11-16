@@ -24,6 +24,7 @@ module.exports = {
     marketing: 2,// ava
     profit: 3,// ava
     technology: 4,
+    technology2: 5,
     A: 10,
     B: 11,
     C: 12,

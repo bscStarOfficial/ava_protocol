@@ -6,8 +6,7 @@ const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const common = require("./util/common");
 const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {addLiquidity, swapE2T, getAmountsOut, getAmountsIn, dexInit} = require("./util/dex");
-const {multiTransfer, multiApprove, tokenBalance, toFNumber} = require("./util/common");
-let dead = {address: '0x000000000000000000000000000000000000dEaD'};
+const {multiTransfer, multiApprove, tokenBalance, toFNumber, dead} = require("./util/common");
 
 let deployer, marketing, profit, technology, A, B, C, D, E, F, G;
 let ava, usdt, router;

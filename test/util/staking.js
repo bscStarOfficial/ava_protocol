@@ -14,15 +14,17 @@ async function stakingInit() {
 
 function stake(account, uAmount, stakeIndex) {
   uAmount = parseEther(uAmount.toString());
-  return staking.connect(account).stake(uAmount, 0, stakeIndex);
+  return staking.connect(account).stake(
+    uAmount, 0, stakeIndex
+  );
 }
 
-function unStake(account, stakeIndex) {
-  return staking.connect(account).unStake(stakeIndex);
+function unStake(account, index) {
+  return staking.connect(account).unStake(index);
 }
 
-function redeemBuyUnStake(account, index) {
-  return staking.connect(account).redeemBuyUnStake(index);
+function redeemUnStake(account, index) {
+  return staking.connect(account).redeemUnStake(index);
 }
 
 function claimAbandonedBalance(token, amount) {
@@ -34,12 +36,24 @@ async function balanceOf(account) {
   return await staking.balanceOf(account.address);
 }
 
+async function maxStakeAmount() {
+  let res = await staking.maxStakeAmount();
+  return new BigNumber(res.toString()).dividedBy(1e18).toNumber();
+}
+
 async function rewardOfSlot(account, index) {
-  return await staking.rewardOfSlot(account.address, index);
+  let res = await staking.rewardOfSlot(account.address, index);
+  return new BigNumber(res.toString()).dividedBy(1e18).toNumber();
+}
+
+async function setTeamVirtuallyInvestValue(account, amount) {
+  amount = parseEther(amount.toString());
+  await staking.setTeamVirtuallyInvestValue(account.address, amount);
 }
 
 async function getTeamKpi(account) {
-  return await staking.getTeamKpi(account.address);
+  let res = await staking.getTeamKpi(account.address);
+  return new BigNumber(res.toString()).dividedBy(1e18).toNumber();
 }
 
 async function isPreacher(account) {
@@ -48,12 +62,14 @@ async function isPreacher(account) {
 
 module.exports = {
   stakingInit,
+  maxStakeAmount,
   claimAbandonedBalance,
   stake,
   unStake,
-  redeemBuyUnStake,
+  redeemUnStake,
   balanceOf,
   rewardOfSlot,
   getTeamKpi,
   isPreacher,
+  setTeamVirtuallyInvestValue
 }

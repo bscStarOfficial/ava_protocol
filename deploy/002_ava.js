@@ -49,10 +49,16 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   }
 
   if (await staking.AVA() === ethers.constants.AddressZero) {
-    let tx = await staking.setAVA(ava.address);
+    let tx1 = await staking.setAVA(ava.address);
     if (chainId != 31337) {
-      console.log('staking.setAVA', tx.hash);
-      await tx.wait();
+      console.log('staking.setAVA', tx1.hash);
+      await tx1.wait();
+    }
+
+    let tx2 = await ava.transfer(staking.address, parseEther('200000'));
+    if (chainId != 31337) {
+      console.log('transfer 20w', tx2.hash);
+      await tx2.wait();
     }
   }
 

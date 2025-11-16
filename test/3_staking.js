@@ -7,8 +7,8 @@ const common = require("./util/common");
 const {loadFixture, time} = require("@nomicfoundation/hardhat-network-helpers");
 const {referralInit, userBindReferral30} = require("./util/referral");
 const {addLiquidity, dexInit} = require("./util/dex");
-const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtuallyInvestValue, getTeamKpi} = require("./util/staking");
-const {multiApprove} = require("./util/common");
+const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtuallyInvestValue, getTeamKpi, isPreacher, redeemUnStake} = require("./util/staking");
+const {multiApprove, tokenBalance} = require("./util/common");
 const BigNumber = require("bignumber.js");
 
 let deployer, root, technology2, marketing;
@@ -31,6 +31,55 @@ async function initialFixture() {
   await addLiquidity(deployer, 1000000, 1000000);
   await ava.updatePoolReserve();
 }
+
+describe('开启买入赎回机制', function () {
+  before(async function () {
+    await initialFixture();
+    await stake(wallets[29], 100, 0);
+    await staking.setIsBuyUnStake(true);
+  })
+  it('购买总收益100%的AVA代币，方可以赎回本息', async function () {
+    await time.increase(86400);
+    let amountU = await rewardOfSlot(wallets[29], 0);
+    let interest = new BigNumber(amountU).minus(100);
+    await unStake(wallets[29], 0);
+  })
+  it('24小时后赎回 AVA', async function () {
+    await time.increase(86400 - 10);
+    await expect(redeemUnStake(wallets[29], 0)).to.revertedWith('!time');
+
+    await time.increase( 11);
+    await redeemUnStake(wallets[29], 0);
+  })
+})
+
+describe('本金赎回手续费机制', function () {
+  before(async function () {
+    await initialFixture();
+    await stake(wallets[29], 100, 0);
+  })
+  it('0-49%可调整', async () => {
+    await staking.setUnStakeFee(100);
+  })
+  it('本金部分扣除 “本”+“息”合计的10%手续费，自动从底池买入AVA代币转入黑洞地址', async function () {
+    await time.increase(86400);
+    let amountU = new BigNumber(await rewardOfSlot(wallets[29], 0));
+    let interest = amountU.minus(100);
+
+    let uB = await tokenBalance(usdt, wallets[29]);
+    await unStake(wallets[29], 0);
+    let uBack = new BigNumber(await tokenBalance(usdt, wallets[29])).minus(uB).toNumber();
+
+    expect(uBack).to.closeTo(
+      interest.multipliedBy(0.7).plus(100).minus(
+        amountU.multipliedBy(0.1)
+      ).toNumber(),
+      interest.dividedBy(10000).toNumber()
+    );
+
+  })
+  it('动态收益部分不变')
+})
 
 describe("质押", function () {
   before(async function () {
@@ -189,18 +238,14 @@ describe('团队业绩', function () {
   })
 })
 
-describe('本金总额大于等于200U才可获得推荐奖励', function () {
-  it('低于200无法获取直推奖')
-  it('低于200无法获取团队奖')
-})
-
-describe('开启买入赎回机制', function () {
-  it('购买总收益100%的AVA代币，方可以赎回本息')
-  it('24小时后赎回 AVA')
-})
-
-describe('本金赎回手续费机制', function () {
-  it('0-49%可调整')
-  it('本金部分扣除 “本”+“息”合计的10%手续费，自动从底池买入AVA代币转入黑洞地址')
-  it('动态收益部分不变')
-})
+// describe('本金总额大于等于200U才可获得推荐奖励', function () {
+//   before(async function () {
+//     await initialFixture();
+//     await stake(wallets[29], 100, 0);
+//   })
+//   it('低于200无法获取动态奖', async () => {
+//     expect(await isPreacher(wallets[29])).to.eq(false);
+//     await stake(wallets[29], 100, 0);
+//     expect(await isPreacher(wallets[29])).to.eq(true);
+//   })
+// })

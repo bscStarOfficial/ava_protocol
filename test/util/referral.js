@@ -19,11 +19,11 @@ async function userBindReferral30() {
   for (let i = 0; i < 30; i++) {
     let wallet = Wallet.createRandom().connect(provider);
     await setBalance(wallet.address, parseEther('100'));
-    let referrer = i == 0 ? root : wallets[i - 1].address;
+    let referrer = i == 0 ? root.address : wallets[i - 1].address;
     await referral.connect(wallet).userBindReferral(referrer);
 
     await usdt.transfer(wallet.address, parseEther('100000'));
-    await usdt.approve(staking.address, parseEther('100000'));
+    await usdt.connect(wallet).approve(staking.address, parseEther('100000'));
 
     wallets.push(wallet);
   }
