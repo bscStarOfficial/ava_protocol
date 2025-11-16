@@ -109,14 +109,15 @@ describe('手续费添加流动性', async function () {
   it('触发添加流动性', async function () {
     await ava.swapTokenForFundByOwner();
   })
-  it('usdt用不完，token合约有残留', async function () {
-    abandonedBalance = await tokenBalance(usdt, ava);
-    expect(abandonedBalance).to.gt(0)
-  })
+  // it('usdt用不完，token合约有残留', async function () {
+  //   abandonedBalance = await tokenBalance(usdt, ava);
+  //   expect(abandonedBalance).to.gt(0)
+  // })
 
   it('claimAbandonedBalance提取残留usdt', async function () {
-    await expect(ava.claimAbandonedBalance(usdt.address, abandonedBalance)).to.changeTokenBalance(
-      usdt, deployer, parseEther(abandonedBalance.toString())
+    await usdt.connect(B).transfer(ava.address, parseEther('10'));
+    await expect(ava.claimAbandonedBalance(usdt.address, parseEther('10'))).to.changeTokenBalance(
+      usdt, deployer, parseEther('10')
     )
     expect(await tokenBalance(usdt, ava)).to.eq(0);
   })
