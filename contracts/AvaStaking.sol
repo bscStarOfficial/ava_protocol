@@ -37,6 +37,7 @@ contract AvaStaking is Owned, BaseSwap {
     uint public unStakeFee; // 1000
 
     address public marketingAddress;
+    address public technologyAddress;
 
     uint8 public constant decimals = 18;
     string public constant name = "Staked AVA";
@@ -77,12 +78,14 @@ contract AvaStaking is Owned, BaseSwap {
     constructor(
         IReferral REFERRAL_,
         address marketingAddress_,
+        address technologyAddress_,
         IERC20 USDT_,
         address ROUTER_
     ) Owned(msg.sender) BaseSwap(ROUTER_) {
         REFERRAL = REFERRAL_;
         USDT = USDT_;
         marketingAddress = marketingAddress_;
+        technologyAddress = technologyAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
 
@@ -97,6 +100,10 @@ contract AvaStaking is Owned, BaseSwap {
 
     function setMarketingAddress(address _account) external onlyOwner {
         marketingAddress = _account;
+    }
+
+    function setTechnologyAddress(address addr) external onlyOwner {
+        technologyAddress = addr;
     }
 
     function setIsBuyUnStake(bool _isBuyUnStake) external onlyOwner {
