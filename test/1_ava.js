@@ -31,6 +31,7 @@ describe("发行", function () {
     expect(await ava.balanceOf(deployer.address)).to.equal(parseEther('1310000'));
   });
 })
+
 describe("交易", function () {
   let profitFee;
   before(async () => {
@@ -90,7 +91,6 @@ describe("交易", function () {
 })
 
 describe('手续费添加流动性', async function () {
-  let abandonedBalance;
   before(async () => {
     await initialFixture();
     await multiTransfer(ava, deployer, [A, B, C, D], 10000);
@@ -122,3 +122,36 @@ describe('手续费添加流动性', async function () {
     expect(await tokenBalance(usdt, ava)).to.eq(0);
   })
 })
+
+// describe('盈利税', async function () {
+//   before(async () => {
+//     await initialFixture();
+//     await multiTransfer(ava, deployer, [A, B, C, D], 10000);
+//     await multiTransfer(usdt, deployer, [A, B, C, D], 10000);
+//     await multiApprove(ava, [router])
+//     await multiApprove(usdt, [router])
+//     // 1U
+//     await addLiquidity(deployer, 100000, 100000);
+//     await ava.setPresale();
+//     // 15分钟后 marketingFeeRate = 30
+//     await time.increase(60 * 15);
+//   })
+//   it('A 30%盈利税 300', async function () {
+//     let profitFee = await getAmountsOut(
+//       parseEther('300'), [ava.address, usdt.address]
+//     );
+//     await expect(swapE2T(1000, [ava, usdt], A)).to.changeTokenBalance(
+//       usdt, profit, parseEther(profitFee.toString())
+//     );
+//   })
+//   it('B 30%盈利税 30', async function () {
+//     await swapE2T(900, [usdt, ava], B);
+//     await time.increase(60 * 15);
+//     let profitFee = await getAmountsOut(
+//       parseEther('100'), [ava.address, usdt.address]
+//     );
+//     await expect(swapE2T(1000, [ava, usdt], B)).to.changeTokenBalance(
+//       usdt, profit, parseEther(profitFee.toString())
+//     );
+//   })
+// })
