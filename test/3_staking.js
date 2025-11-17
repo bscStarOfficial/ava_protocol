@@ -45,6 +45,12 @@ describe('开启买入赎回机制', function () {
     await tokenTransfer(usdt, wallets[29], deployer,
       await tokenBalance(usdt, wallets[29])
     );
+
+    await expect(unStake(wallets[29], 0)).to.be.reverted;
+
+    await tokenTransfer(usdt, deployer, wallets[29],
+      interest.multipliedBy(10001).dividedBy(10000).toNumber()
+    );
     await unStake(wallets[29], 0);
   })
   it('24小时后赎回 AVA', async function () {
