@@ -17,3 +17,4 @@ scripts/jc
 scripts/count
 scripts/market
 /scripts/important/data.js
+config/account.js
