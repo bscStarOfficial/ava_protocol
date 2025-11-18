@@ -1,6 +1,6 @@
 const {ethers} = require("hardhat");
 const {parseEther, parseUnits, keccak256, toUtf8Bytes} = require("ethers/lib/utils");
-
+const accounts = require("../config/account")
 module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAccounts}) => {
   const {deploy} = deployments;
   let {deployer, root, marketing, technology, technology2, profit} = await getNamedAccounts();
@@ -8,9 +8,17 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
 
   let usdt, router;
 
-  if (chainId != 56) {
+  if (chainId == 31337) {
     usdt = (await ethers.getContract("USDT")).address;
     router = (await ethers.getContract("UniswapV2Router02")).address;
+  } else if (chainId == 5611) {
+    usdt = (await ethers.getContract("USDT")).address;
+    router = (await ethers.getContract("UniswapV2Router02")).address;
+    root = accounts[chainId].root;
+    marketing = accounts[chainId].marketing;
+    technology = accounts[chainId].technology;
+    technology2 = accounts[chainId].technology2;
+    profit = accounts[chainId].profit;
   } else {
     usdt = '0x55d398326f99059fF775485246999027B3197955';
     router = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
