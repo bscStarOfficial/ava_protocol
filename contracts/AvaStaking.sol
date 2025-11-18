@@ -63,8 +63,9 @@ contract AvaStaking is Owned, BaseSwap {
     }
 
     struct Record {
+        uint32 id;
         uint40 stakeTime;
-        uint160 amount;
+        uint128 amount;
         bool status;
         uint8 stakeIndex;
         uint40 unStakeTime; // Reward at the time of unstake
@@ -150,7 +151,7 @@ contract AvaStaking is Owned, BaseSwap {
         else return Math.min256(p1 - lastIn, 1000 ether);
     }
 
-    function stake(uint160 _amount, uint256 amountOutMin, uint8 _stakeIndex) external onlyEOA {
+    function stake(uint128 _amount, uint256 amountOutMin, uint8 _stakeIndex) external onlyEOA {
         require(_amount <= maxStakeAmount(), "<1000");
         require(_stakeIndex <= 2, "<=2");
         swapAndAddLiquidity(_amount, amountOutMin);
@@ -158,7 +159,7 @@ contract AvaStaking is Owned, BaseSwap {
     }
 
     function stakeWithInviter(
-        uint160 _amount,
+        uint128 _amount,
         uint256 amountOutMin,
         uint8 _stakeIndex,
         address parent
@@ -173,7 +174,7 @@ contract AvaStaking is Owned, BaseSwap {
         mint(user, _amount, _stakeIndex);
     }
 
-    function swapAndAddLiquidity(uint160 _amount, uint256 amountOutMin) private {
+    function swapAndAddLiquidity(uint128 _amount, uint256 amountOutMin) private {
         USDT.transferFrom(msg.sender, address(this), _amount);
 
         uint256 balb = AVA.balanceOf(address(this));
@@ -198,23 +199,23 @@ contract AvaStaking is Owned, BaseSwap {
         );
     }
 
-    function mint(address sender, uint160 _amount, uint8 _stakeIndex) private {
+    function mint(address sender, uint128 _amount, uint8 _stakeIndex) private {
         require(REFERRAL.isBindReferral(sender), "!!bind");
         RecordTT memory tsy;
         tsy.stakeTime = uint40(block.timestamp);
         tsy.tamount = uint160(totalSupply);
         t_supply.push(tsy);
 
-        Record memory order;
-        order.stakeTime = uint40(block.timestamp);
-        order.amount = _amount;
-        order.status = false;
-        order.stakeIndex = _stakeIndex;
-
         totalSupply += _amount;
         balances[sender] += _amount;
         Record[] storage cord = userStakeRecord[sender];
         uint256 stake_index = cord.length;
+
+        Record memory order;
+        order.id = uint32(stake_index);
+        order.stakeTime = uint40(block.timestamp);
+        order.amount = _amount;
+        order.stakeIndex = _stakeIndex;
         cord.push(order);
 
         address[] memory referrals = REFERRAL.getReferrals(sender, maxD);
@@ -344,8 +345,10 @@ contract AvaStaking is Owned, BaseSwap {
         uint256 bala = AVA.balanceOf(address(this));
 
         Record memory order;
+        order.id = uint32(userUnStakeRecord[msg.sender].length);
         order.stakeTime = uint40(block.timestamp);
-        order.amount = uint160(bala - balb);
+        order.amount = uint128(bala - balb);
+
         userUnStakeRecord[msg.sender].push(order);
     }
 
