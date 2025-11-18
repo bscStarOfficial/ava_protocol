@@ -5,7 +5,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   const {deploy} = deployments;
   let {deployer} = await getNamedAccounts();
   const chainId = await getChainId()
-  if (chainId != 31337) return;
+  if (chainId == 56) return;
 
   await deploy('USDT', {
     from: deployer,
