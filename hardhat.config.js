@@ -21,11 +21,11 @@ module.exports = {
   namedAccounts: {
     deployer: 0,
     root: 1, // ava
-    marketing: 2,// ava
-    profit: 3,// ava
-    technology: 4,
-    marketing2: 2,// staking
-    technology2: 4, // staking
+    avaMarketing: 2,// ava
+    avaProfit: 3,// ava
+    avaTechnology: 4,
+    stakingMarketing: 5,// staking
+    stakingTechnology: 6, // staking
     A: 10,
     B: 11,
     C: 12,
