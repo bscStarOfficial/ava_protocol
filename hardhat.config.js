@@ -20,7 +20,7 @@ module.exports = {
   },
   namedAccounts: {
     deployer: 0,
-    root: 1, // ava
+    referralRoot: 1, // ava
     avaMarketing: 2,// ava
     avaProfit: 3,// ava
     avaTechnology: 4,

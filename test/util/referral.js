@@ -9,7 +9,7 @@ let ava, usdt, referral, staking, root, provider;
 
 async function referralInit() {
   [ava, usdt, referral, staking] = await common.getContractByNames(["AVA", 'USDT', 'Referral', 'AvaStaking']);
-  [root] = await common.getAccounts(["root"]);
+  [root] = await common.getAccounts(["referralRoot"]);
   provider = ethers.provider;
 }
 

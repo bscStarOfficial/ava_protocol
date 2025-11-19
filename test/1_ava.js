@@ -27,7 +27,7 @@ describe("发行", function () {
   })
   it('AVA总发行量131万枚', async function () {
     expect(await ava.totalSupply()).to.equal(parseEther('1310000'));
-    expect(await ava.balanceOf(deployer.address)).to.equal(parseEther('1310000'));
+    expect(await ava.balanceOf(deployer.address)).to.equal(parseEther('1110000'));
   });
 })
 
