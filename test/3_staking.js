@@ -24,7 +24,9 @@ async function initialFixture() {
   await referralInit();
   await stakingInit();
   await dexInit();
-  [deployer, root, technology2, marketing] = await common.getAccounts(["deployer", "root", 'technology2', 'marketing']);
+  [deployer, root, technology2, marketing] = await common.getAccounts([
+    "deployer", "referralRoot", 'stakingTechnology', 'stakingMarketing'
+  ]);
   wallets = await userBindReferral30();
   await multiApprove(ava, [router])
   await multiApprove(usdt, [router])

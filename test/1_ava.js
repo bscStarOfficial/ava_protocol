@@ -17,7 +17,7 @@ async function initialFixture() {
 
   [ava, usdt, router] = await common.getContractByNames(["AVA", 'USDT', 'UniswapV2Router02']);
   [deployer, marketing, profit, technology, A, B, C, D, E, F, G] = await common.getAccounts(
-    ["deployer", "marketing", "profit", "technology", "A", "B", "C", "D", "E", "F", "G"]
+    ["deployer", "avaMarketing", "avaProfit", "avaTechnology", "A", "B", "C", "D", "E", "F", "G"]
   );
 }
 
