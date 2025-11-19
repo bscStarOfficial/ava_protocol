@@ -353,8 +353,8 @@ contract USDT is Context, IBEP20, Ownable {
     string public _name;
 
     constructor() public {
-        _name = "Tether USD";
-        _symbol = "USDT";
+        _name = "UUU";
+        _symbol = "UUU";
         _decimals = 18;
         _totalSupply = 30000000000000000000000000;
         _balances[msg.sender] = _totalSupply;
