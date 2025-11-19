@@ -7,12 +7,8 @@ module.exports = {
     }
   },
   bsc: {
-    url: 'https://bsc-mainnet.core.chainstack.com/fb89443d044ec0368a0b305e4fc983f1',
-    // url: "https://bsc.mytokenpocket.vip",
-    // url: 'https://rpc.ankr.com/bsc/805167a24b8e7e42822bef6d5b81be6e136f777141fb11363f6aa19909cc0cbd',
-    // url: 'https://api.zan.top/node/v1/bsc/mainnet/74878801433245639c34cc73c3dab3a4',
-    // url: "https://bsc.blockpi.network/v1/rpc/e130f44902150d543570cb0db1bfb1c36f4e7bf9",
-    // url: "https://bsc.blockpi.network/v1/rpc/public",
+    url: 'https://bsc-dataseed.bnbchain.org',
+    // url: 'https://bsc-mainnet.core.chainstack.com/fb89443d044ec0368a0b305e4fc983f1',
     accounts: [process.env.PRIVATE_KEY_BSC],
     chainId: 56,
     gasPrice: 1 * 100000000, // 0.1Gwei
