@@ -3,7 +3,7 @@ const {parseEther, parseUnits, keccak256, toUtf8Bytes} = require("ethers/lib/uti
 const accounts = require("../config/account")
 module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAccounts}) => {
   const {deploy} = deployments;
-  let {deployer, root, marketing, technology, technology2, profit} = await getNamedAccounts();
+  let {deployer, referralRoot, avaProfit, avaMarketing, avaTechnology, stakingMarketing, stakingTechnology} = await getNamedAccounts();
   const chainId = await getChainId()
 
   let usdt, router;
@@ -20,17 +20,18 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   }
 
   if (chainId != 31337) {
-    root = accounts[chainId].root;
-    marketing = accounts[chainId].marketing;
-    technology = accounts[chainId].technology;
-    technology2 = accounts[chainId].technology2;
-    profit = accounts[chainId].profit;
+    referralRoot = accounts[chainId].referralRoot;
+    avaProfit = accounts[chainId].avaProfit;
+    avaMarketing = accounts[chainId].avaMarketing;
+    avaTechnology = accounts[chainId].avaTechnology;
+    stakingMarketing = accounts[chainId].stakingMarketing;
+    stakingTechnology = accounts[chainId].stakingTechnology;
   }
 
   await deploy('Referral', {
     from: deployer,
     gasLimit: 30000000,
-    args: [root],
+    args: [referralRoot],
     log: true,
   });
   let referral = await ethers.getContract("Referral");
@@ -38,7 +39,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   await deploy('AvaStaking', {
     from: deployer,
     gasLimit: 30000000,
-    args: [referral.address, marketing, technology2, usdt, router],
+    args: [referral.address, stakingMarketing, stakingTechnology, usdt, router],
     log: true,
   });
   let staking = await ethers.getContract("AvaStaking");
@@ -46,7 +47,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   await deploy('AVA', {
     from: deployer,
     gasLimit: 30000000,
-    args: [staking.address, profit, marketing, technology, usdt, router],
+    args: [staking.address, avaProfit, avaMarketing, avaTechnology, usdt, router],
     log: true,
   });
   let ava = await ethers.getContract("AVA");
