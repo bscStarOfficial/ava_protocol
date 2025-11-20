@@ -26,6 +26,7 @@ interface IAVA {
     function isPreacher(address user) external view returns (bool);
     function is200Pair(address user) external  view returns (bool);
     function lastLPFeefenhongTime() external view returns (uint256);
+    function updatePoolReserve() external;
     function launchedAtTimestamp() external view returns (uint40);
     function minDistribution() external view returns (uint256);
     function minPeriod() external view returns (uint256);

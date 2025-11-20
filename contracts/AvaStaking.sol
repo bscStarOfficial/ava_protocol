@@ -178,6 +178,8 @@ contract AvaStaking is Owned, BaseSwap {
             REFERRAL.bindReferral(parent, user);
         }
         mint(user, _amount, _stakeIndex);
+
+        AVA.updatePoolReserve();
     }
 
     function swapAndAddLiquidity(uint128 _amount, uint256 amountOutMin) private {
