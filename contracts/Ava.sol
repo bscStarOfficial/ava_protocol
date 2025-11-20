@@ -51,10 +51,11 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
 
     // Not removable; early calls to the staking contract.
     function updatePoolReserve() public {
-        require(block.timestamp >= poolStatus.t + 1 hours, "1hor");
-        poolStatus.t = uint40(block.timestamp);
-        (uint112 reserveU,) = getReserves();
-        poolStatus.bal = reserveU;
+        if (block.timestamp >= poolStatus.t + 1 hours) {
+            poolStatus.t = uint40(block.timestamp);
+            (uint112 reserveU,) = getReserves();
+            poolStatus.bal = reserveU;
+        }
     }
 
     function updatePoolReserve(uint112 reserveU) private {
