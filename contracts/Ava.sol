@@ -180,7 +180,7 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
                     swapProfit(fee);
                 }
             }
-            if (shouldSwapTokenForFund(AmountLPFee + AmountMarketingFee)) {
+            if (shouldSwapTokenForFund(AmountLPFee + AmountMarketingFee + TechnologyFee)) {
                 swapTokenForFund();
             }
             super._transfer(sender, address(this), marketingFee + technologyFee);
@@ -221,6 +221,10 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
             swapTokenForUsdt(AmountMarketingFee, marketingAddress);
             AmountMarketingFee = 0;
         }
+        if (TechnologyFee > 0) {
+            swapTokenForUsdt(TechnologyFee, technologyAddress);
+            TechnologyFee = 0;
+        }
 
         if (AmountLPFee > 0) {
             swapAndLiquify(AmountLPFee);
@@ -239,7 +243,8 @@ contract AVA is ExcludedFromFeeList, BaseUSDT, FirstLaunch, ERC20 {
     function swapProfit(uint256 tokenAmount) internal lockTheSwap {
         uint256 bal = balanceOf[address(this)] -
                     AmountLPFee -
-                    AmountMarketingFee;
+                    AmountMarketingFee -
+                    TechnologyFee;
         uint256 t2 = tokenAmount * 2;
         // It looks tokenAmount * 2, but it's actually just the current balance minus the fee
         uint256 amountIn = t2 >= bal ? bal : t2;
