@@ -82,6 +82,7 @@ contract AvaStaking is Owned, BaseSwap {
         IReferral REFERRAL_,
         address marketingAddress_,
         address technologyAddress_,
+        address teamAddress_,
         IERC20 USDT_,
         address ROUTER_
     ) Owned(msg.sender) BaseSwap(ROUTER_) {
@@ -89,6 +90,7 @@ contract AvaStaking is Owned, BaseSwap {
         USDT = USDT_;
         marketingAddress = marketingAddress_;
         technologyAddress = technologyAddress_;
+        teamAddress = teamAddress_;
         USDT.approve(address(ROUTER), type(uint256).max);
     }
 
