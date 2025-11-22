@@ -30,7 +30,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId, getUnnamedAc
   await deploy('AvaStaking', {
     from: deployer,
     gasLimit: 30000000,
-    args: [referral.address, stakingMarketing, stakingTechnology, usdt, router],
+    args: [referral.address, stakingMarketing, stakingTechnology, stakingTeam, usdt, router],
     log: true,
   });
   let staking = await ethers.getContract("AvaStaking");
