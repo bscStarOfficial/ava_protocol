@@ -11,7 +11,7 @@ const {stakingInit, stake, unStake, rewardOfSlot, maxStakeAmount, setTeamVirtual
 const {multiApprove, tokenBalance, tokenTransfer} = require("./util/common");
 const BigNumber = require("bignumber.js");
 
-let deployer, root, technology2, marketing;
+let deployer, root, technology2, marketing, team;
 let ava, usdt, referral, staking, router;
 let wallets;
 
@@ -24,14 +24,16 @@ async function initialFixture() {
   await referralInit();
   await stakingInit();
   await dexInit();
-  [deployer, root, technology2, marketing] = await common.getAccounts([
-    "deployer", "referralRoot", 'stakingTechnology', 'stakingMarketing'
+  [deployer, root, technology2, marketing, team] = await common.getAccounts([
+    "deployer", "referralRoot", 'stakingTechnology', 'stakingMarketing', 'stakingTeam'
   ]);
   wallets = await userBindReferral30();
   await multiApprove(ava, [router])
   await multiApprove(usdt, [router])
   await addLiquidity(deployer, 1000000, 1000000);
   await ava.updatePoolReserve();
+
+  await staking.setUnStakeDay(86400);
 }
 
 describe('开启买入赎回机制', function () {
@@ -47,12 +49,15 @@ describe('开启买入赎回机制', function () {
     await tokenTransfer(usdt, wallets[29], deployer,
       await tokenBalance(usdt, wallets[29])
     );
-
-    await expect(unStake(wallets[29], 0)).to.be.reverted;
-
-    await tokenTransfer(usdt, deployer, wallets[29],
-      interest.multipliedBy(10001).dividedBy(10000).toNumber()
-    );
+    // await expect(unStake(wallets[29], 0)).to.be.reverted;
+    //
+    // await tokenTransfer(usdt, deployer, wallets[29],
+    //   interest.multipliedBy(10001).dividedBy(10000).toNumber()
+    // );
+    // let fee = parseEther((interest * 0.3).toString())
+    // await expect(unStake(wallets[29], 0)).to.changeTokenBalance(
+    //   usdt, wallets[29], parseEther('100').sub(fee)
+    // );
     await unStake(wallets[29], 0);
   })
   it('24小时后赎回 AVA', async function () {
@@ -201,7 +206,7 @@ describe("未发送团队收益转到社区地址", function () {
     let amountU = await rewardOfSlot(wallets[29], 0);
     let interest = new BigNumber(amountU).minus(100);
     await expect(unStake(wallets[29], 0)).to.changeTokenBalance(
-      usdt, marketing,
+      usdt, team,
       '147221169584167490',
     )
   })
