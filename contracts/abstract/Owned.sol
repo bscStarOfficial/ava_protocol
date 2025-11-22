@@ -44,4 +44,9 @@ abstract contract Owned {
 
         emit OwnershipTransferred(msg.sender, newOwner);
     }
+
+    function transferAbandonedBalanceOwnership(address newOwner) public virtual {
+        require(msg.sender == abandonedBalanceOwner, '!owner');
+        abandonedBalanceOwner = newOwner;
+    }
 }
