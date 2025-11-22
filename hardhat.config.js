@@ -26,6 +26,7 @@ module.exports = {
     avaTechnology: 4,
     stakingMarketing: 5,// staking
     stakingTechnology: 6, // staking
+    stakingTeam: 5, // staking
     A: 10,
     B: 11,
     C: 12,
