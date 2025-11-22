@@ -49,7 +49,7 @@ contract AvaStaking is Owned, BaseSwap {
 
     mapping(address => Record[]) public userStakeRecord;
     bool public isBuyUnStake;
-    uint40 public unStakeDay = 1 days;
+    uint40 public unStakeDay = 30 days;
     mapping(address => Record[]) public userUnStakeRecord; // Buy and redeem
     mapping(address => uint256) public teamTotalInvestValue;
     mapping(address => uint256) public teamVirtuallyInvestValue;
@@ -118,7 +118,7 @@ contract AvaStaking is Owned, BaseSwap {
     }
 
     function setUnStakeDay(uint40 _unStakeDay) external onlyOwner {
-        require(_unStakeDay <= 1 days, 'max 1 day');
+        require(_unStakeDay <= 30 days, 'max 30 day');
         unStakeDay = _unStakeDay;
     }
 
