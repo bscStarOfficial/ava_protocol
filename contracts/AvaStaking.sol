@@ -38,6 +38,7 @@ contract AvaStaking is Owned, BaseSwap {
 
     address public marketingAddress;
     address public technologyAddress;
+    address public teamAddress;
 
     uint8 public constant decimals = 18;
     string public constant name = "Staked AVA";
@@ -106,6 +107,10 @@ contract AvaStaking is Owned, BaseSwap {
 
     function setTechnologyAddress(address addr) external onlyOwner {
         technologyAddress = addr;
+    }
+
+    function setTeamAddress(address addr) external onlyOwner {
+        teamAddress = addr;
     }
 
     function setIsBuyUnStake(bool _isBuyUnStake) external onlyOwner {
@@ -462,7 +467,7 @@ contract AvaStaking is Owned, BaseSwap {
             }
         }
         if (maxTeamRate > spendRate) {
-            USDT.transfer(marketingAddress, fee - ((_interest * spendRate) / 100));
+            USDT.transfer(teamAddress, fee - ((_interest * spendRate) / 100));
         }
     }
 
