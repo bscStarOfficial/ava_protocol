@@ -27,6 +27,7 @@ module.exports = {
     stakingMarketing: 5,// staking
     stakingTechnology: 6, // staking
     stakingTeam: 5, // staking
+    admin: 7,
     A: 10,
     B: 11,
     C: 12,

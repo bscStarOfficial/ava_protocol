@@ -24,8 +24,8 @@ async function initialFixture() {
   await referralInit();
   await stakingInit();
   await dexInit();
-  [deployer, root, technology2, marketing, team] = await common.getAccounts([
-    "deployer", "referralRoot", 'stakingTechnology', 'stakingMarketing', 'stakingTeam'
+  [deployer, root, technology2, marketing, team, A] = await common.getAccounts([
+    "deployer", "referralRoot", 'stakingTechnology', 'stakingMarketing', 'stakingTeam', 'A'
   ]);
   wallets = await userBindReferral30();
   await multiApprove(ava, [router])
@@ -251,6 +251,30 @@ describe('团队业绩', function () {
     for (let i = 0; i < 29; i++) {
       expect(await getTeamKpi(wallets[i])).to.eq(0);
     }
+  })
+})
+
+describe('权限', async function () {
+  before(async () => {
+    await initialFixture();
+  })
+  it('owner', async function () {
+    await expect(staking.connect(A).setMarketingAddress(A.address)).to.revertedWith('!owner');
+    await staking.transferOwnership(A.address);
+    await expect(staking.setMarketingAddress(A.address)).to.revertedWith('!owner');
+    await expect(staking.connect(A).setMarketingAddress(A.address)).to.be.ok;
+  })
+  it('admin', async function () {
+    await expect(staking.connect(A).setIsBuyUnStake(false)).to.revertedWith('!admin');
+    await staking.transferAdmin(A.address);
+    await expect(staking.setIsBuyUnStake(false)).to.revertedWith('!admin');
+    await expect(staking.connect(A).setIsBuyUnStake(false)).to.be.ok;
+  })
+  it('abandonedBalanceOwner', async function () {
+    await expect(staking.connect(A).claimAbandonedBalance(usdt.address, 0)).to.revertedWith('!o');
+    await staking.transferAbandonedBalanceOwnership(A.address);
+    await expect(staking.claimAbandonedBalance(usdt.address, 0)).to.revertedWith('!o');
+    await expect(staking.connect(A).claimAbandonedBalance(usdt.address, 0)).to.be.ok;
   })
 })
 
