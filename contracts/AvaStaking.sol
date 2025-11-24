@@ -115,22 +115,22 @@ contract AvaStaking is Owned, BaseSwap {
         teamAddress = addr;
     }
 
-    function setIsBuyUnStake(bool _isBuyUnStake) external onlyOwner {
+    function setStakeDays(uint[3] memory stakeDays_) external onlyOwner {
+        stakeDays = stakeDays_;
+    }
+
+    function setIsBuyUnStake(bool _isBuyUnStake) external onlyAdmin {
         isBuyUnStake = _isBuyUnStake;
     }
 
-    function setUnStakeFee(uint _unStakeFee) external onlyOwner {
+    function setUnStakeFee(uint _unStakeFee) external onlyAdmin {
         require(_unStakeFee < 500, 'max 49%');
         unStakeFee = _unStakeFee;
     }
 
-    function setUnStakeDay(uint40 _unStakeDay) external onlyOwner {
+    function setUnStakeDay(uint40 _unStakeDay) external onlyAdmin {
         require(_unStakeDay <= 30 days, 'max 30 day');
         unStakeDay = _unStakeDay;
-    }
-
-    function setStakeDays(uint[3] memory stakeDays_) external onlyOwner {
-        stakeDays = stakeDays_;
     }
 
     // The amount of staking in the last minute
