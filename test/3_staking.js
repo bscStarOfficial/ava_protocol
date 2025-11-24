@@ -46,12 +46,17 @@ describe("正常赎回", function () {
   describe("本金+直推+项目方=76%", function () {
     before(async function () {
       let teamYJ = [
-        [0, 300_0000],
-        [3, 100_0000],
-        [6, 50_0000],
-        [8, 10_0000],
-        [11, 5_0000],
         [16, 1_0000],
+        [15, 1_1000], // 重复
+        [11, 5_0000],
+        [10, 6_1000], // 重复
+        [8, 10_0000],
+        [7, 12_1000], // 重复
+        [6, 50_0000],
+        [5, 90_1000], // 重复
+        [3, 100_0000],
+        [2, 290_0000],// 重复
+        [0, 300_0000],
       ];
       for (let item of teamYJ) {
         await setTeamVirtuallyInvestValue(wallets[item[0]], item[1]);
@@ -71,7 +76,8 @@ describe("正常赎回", function () {
     it('S6--300万U--24%', async function () {
       let amountU = await rewardOfSlot(wallets[29], 0);
       let interest = new BigNumber(amountU).minus(100);
-      let per = new BigNumber('6009236601189234');
+      // console.log(interest.multipliedBy(1e18).dividedBy(100).toFixed(0))
+      let per = new BigNumber('6009410993908500');
       await expect(unStake(wallets[29], 0)).to.changeTokenBalances(
         usdt,
         [
@@ -80,10 +86,15 @@ describe("正常赎回", function () {
           // technology2,
           // marketing,
           wallets[16],
+          wallets[15], // 重复
           wallets[11],
+          wallets[10], // 重复
           wallets[8],
+          wallets[7], // 重复
           wallets[6],
+          wallets[5], // 重复
           wallets[3],
+          wallets[2], // 重复
           wallets[0],
         ],
         [
@@ -93,10 +104,15 @@ describe("正常赎回", function () {
           // interest.multipliedBy(0.005).multipliedBy(1e18).toFixed(),
           // 团队奖
           per.multipliedBy(5).toFixed(0),
+          0,
           per.multipliedBy(4).toFixed(0),
+          0,
           per.multipliedBy(4).toFixed(0),
+          0,
           per.multipliedBy(4).toFixed(0),
+          0,
           per.multipliedBy(3).toFixed(0),
+          0,
           per.multipliedBy(4).toFixed(0),
         ]
       );
@@ -132,7 +148,7 @@ describe('开启买入赎回机制', function () {
     await time.increase(86400 - 10);
     await expect(redeemUnStake(wallets[29], 0)).to.revertedWith('!time');
 
-    await time.increase( 11);
+    await time.increase(11);
     await redeemUnStake(wallets[29], 0);
   })
 })
