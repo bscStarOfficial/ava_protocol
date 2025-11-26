@@ -1,6 +1,8 @@
 require("dotenv").config();
 
-require("@nomicfoundation/hardhat-toolbox");
+// require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-chai-matchers")
+require("@nomicfoundation/hardhat-verify");
 require("@nomiclabs/hardhat-ethers");
 require('hardhat-deploy');
 require('hardhat-contract-sizer');
