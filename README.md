@@ -11,7 +11,8 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.js
 
-npx hardhat verify --network bsc --constructor-args arguments.js 0xd4c680cA376889e17F5b5c6084b1bE1704759026
+# referral
+npx hardhat verify --network bsc 0xA021AcDe734F0b97eB0E1Ec67Be2d700d628b789 '0x0f3b3484297bBCC02591c89b7df966084CD9503A'
 ```
 
 ## 不享BTN持仓分红地址
